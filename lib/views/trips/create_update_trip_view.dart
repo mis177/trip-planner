@@ -137,32 +137,45 @@ class _CreateUpdateTripViewState extends State<CreateUpdateTripView> {
                     controller: _nameTextController,
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
-                    decoration:
-                        const InputDecoration(hintText: 'Name of a trip'),
+                    decoration: const InputDecoration(
+                      hintText: 'Name of a trip',
+                      helperText: 'Name of your trip',
+                    ),
                   ),
                   TextField(
                     controller: _destinationTextController,
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
-                    decoration:
-                        const InputDecoration(hintText: 'Trip destination'),
+                    decoration: const InputDecoration(
+                      hintText: 'Trip destination',
+                      helperText: 'Destination of your trip',
+                    ),
                   ),
                   TextField(
                     controller: _dateTextController,
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
-                    decoration: const InputDecoration(hintText: 'Trip date'),
+                    decoration: const InputDecoration(
+                      hintText: 'Trip date',
+                      helperText: 'Date of your trip',
+                    ),
                   ),
                   TextField(
                     controller: _noteTextController,
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
-                    decoration: const InputDecoration(hintText: 'My notes'),
+                    decoration: const InputDecoration(
+                      hintText: 'My notes',
+                      helperText: 'Your notes',
+                    ),
                   ),
                   TextField(
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
-                    decoration: const InputDecoration(hintText: 'Trip costs'),
+                    decoration: const InputDecoration(
+                      hintText: 'Trip costs',
+                      helperText: 'Cost of your trip',
+                    ),
                     readOnly: true,
                     onTap: () {
                       Navigator.of(context).pushNamed(tripCostRoute);
