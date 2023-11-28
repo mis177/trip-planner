@@ -173,12 +173,15 @@ class _CreateUpdateTripViewState extends State<CreateUpdateTripView> {
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
                     decoration: const InputDecoration(
-                      hintText: 'Trip costs',
+                      hintText: 'Trip costs [.....]',
                       helperText: 'Cost of your trip',
                     ),
                     readOnly: true,
                     onTap: () {
-                      Navigator.of(context).pushNamed(tripCostRoute);
+                      Navigator.of(context).pushNamed(
+                        tripCostRoute,
+                        arguments: _trip,
+                      );
                     },
                   ),
                 ],

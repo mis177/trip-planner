@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart' show immutable;
 import 'package:path/path.dart';
@@ -10,11 +9,9 @@ import 'package:tripplanner/services/crud/crud_exceptions.dart';
 class TripsService {
   Database? _db;
   List<DatabaseTrip> _trips = [];
-  //List<DatabaseCosts> _costs = [];
   //List<DatabaseRequirements> _requirements = [];
-
   late final StreamController<List<DatabaseTrip>> _tripsStreamController;
-
+  late final StreamController<List<DatabaseCost>> _costsStreamController;
   // singleton
   factory TripsService() => _instance;
   static final TripsService _instance = TripsService._internal();
@@ -28,19 +25,25 @@ class TripsService {
 
   Stream<List<DatabaseTrip>> get allTrips => _tripsStreamController.stream;
 
+  Stream<List<DatabaseCost>> get allCosts => _costsStreamController.stream;
+
   Future<Iterable<DatabaseTrip>> getAllTrips() async {
     await _ensureDbIsOpen();
     final db = getDatabase();
     final trips = await db.query(
       tripsTableName,
     );
-    return trips.map((tripRow) => DatabaseTrip.fromRow(tripRow));
+    final costs = await db.query(
+      costsTableName,
+    );
+
+    return trips.map((tripRow) => DatabaseTrip.fromRow(tripRow,
+        costs.where((cost) => tripRow['id'] == cost['trip_id']).toList()));
   }
 
   Future<DatabaseTrip> addTrip() async {
     await _ensureDbIsOpen();
     final db = getDatabase();
-
     DatabaseTrip newTrip = DatabaseTrip(
         id: DateTime.now().microsecondsSinceEpoch,
         name: '',
@@ -81,9 +84,6 @@ class TripsService {
       case 'destination':
         updatedTrip.destination = value;
         break;
-      case 'costs':
-        updatedTrip.costs = value;
-        break;
       case 'requirements':
         updatedTrip.requirements = value;
         break;
@@ -115,6 +115,83 @@ class TripsService {
     _tripsStreamController.add(_trips);
   }
 
+  Future<DatabaseCost> addCost(int tripId) async {
+    await _ensureDbIsOpen();
+    final db = getDatabase();
+
+    DatabaseCost newCost = DatabaseCost(
+        id: DateTime.now().microsecondsSinceEpoch,
+        activity: '',
+        planned: double.nan,
+        real: double.nan,
+        tripID: tripId);
+    await db.insert(costsTableName, {
+      idColumn: newCost.id,
+      activityNameColumn: newCost.activity,
+      plannedColumn: newCost.planned,
+      realColumn: newCost.real,
+      tripIdColumn: newCost.tripID
+    });
+
+    _trips.singleWhere((element) => element.id == tripId).costs.add(newCost);
+    _tripsStreamController.add(_trips);
+    return newCost;
+  }
+
+  Future<void> updateCost(DatabaseCost cost, String field, value) async {
+    await _ensureDbIsOpen();
+    final db = getDatabase();
+    await db.update(
+      costsTableName,
+      {field: value},
+      where: 'id = ?',
+      whereArgs: [cost.id],
+    );
+
+    final updatedCosts =
+        _trips.singleWhere((trip) => trip.id == cost.tripID).costs;
+    final updatedCost =
+        updatedCosts.singleWhere((oldCost) => oldCost.id == cost.id);
+    switch (field) {
+      case 'activity':
+        updatedCost.activity = value;
+        break;
+      case 'planned':
+        final parsedDouble = double.tryParse(value) ?? double.nan;
+
+        updatedCost.planned = parsedDouble;
+        break;
+      case 'real':
+        final parsedDouble = double.tryParse(value) ?? double.nan;
+
+        updatedCost.real = parsedDouble;
+        break;
+    }
+
+    // print('apdejt');
+    // updatedCosts.forEach((element) {
+    //   print(element.activity);
+    // });
+    _tripsStreamController.add(_trips);
+    //await cacheTrips();
+  }
+
+  Future<void> deleteCost(DatabaseCost cost) async {
+    await _ensureDbIsOpen();
+    final db = getDatabase();
+    await db.delete(
+      costsTableName,
+      where: 'id = ?',
+      whereArgs: [cost.id],
+    );
+    _trips
+        .where((element) => element.id == cost.tripID)
+        .first
+        .costs
+        .remove(cost);
+    _tripsStreamController.add(_trips);
+  }
+
   Future<void> openDb() async {
     //await _db!.query('DROP TABLE IF EXISTS trips');
     if (_db == null) {
@@ -123,7 +200,6 @@ class TripsService {
         final dbPath = join(appDocsPath.path, dbName);
         final db = await openDatabase(dbPath);
         _db = db;
-
         await db.execute(createCostsTable);
         await db.execute(createRequirementsTable);
         await db.execute(createTripsTable);
@@ -131,6 +207,7 @@ class TripsService {
         throw UnableToGetDocumentsDirectory();
       }
     }
+
     await cacheTrips();
   }
 
@@ -164,7 +241,7 @@ class DatabaseTrip {
   int id;
   String name;
   String destination;
-  List<String> costs;
+  List<DatabaseCost> costs;
   List<String> requirements;
   String date;
   String note;
@@ -179,13 +256,24 @@ class DatabaseTrip {
     required this.requirements,
   });
 
-  DatabaseTrip.fromRow(Map<String, Object?> map)
+  DatabaseTrip.fromRow(
+      Map<String, Object?> map, List<Map<String, Object?>> costs)
       : id = map[idColumn] as int,
         name = map[nameColumn] as String,
         destination = map[destinationColumn] as String,
         date = map[dateColumn] as String,
         note = map[noteColumn] as String,
-        costs = [],
+        costs = costs
+            .map((e) => DatabaseCost(
+                  id: e[idColumn] as int,
+                  activity: e[activityNameColumn] as String,
+                  planned: (double.tryParse(e[plannedColumn].toString()) ??
+                      double.nan),
+                  real:
+                      (double.tryParse(e[realColumn].toString()) ?? double.nan),
+                  tripID: e[tripIdColumn] as int,
+                ))
+            .toList(),
         requirements = [];
 
   @override
@@ -195,28 +283,20 @@ class DatabaseTrip {
   int get hashCode => name.hashCode;
 }
 
-@immutable
-class DatabaseCosts {
+class DatabaseCost {
   final int id;
-  final String activity;
-  final Float planned;
-  final Float real;
-  final int tripsFk;
+  String activity;
+  double planned;
+  double real;
+  int tripID;
 
-  const DatabaseCosts({
+  DatabaseCost({
     required this.id,
     required this.activity,
     required this.planned,
     required this.real,
-    required this.tripsFk,
+    required this.tripID,
   });
-
-  DatabaseCosts.fromRow(Map<String, Object> map)
-      : id = map[idColumn] as int,
-        activity = map[activityNameColumn] as String,
-        planned = map[plannedColumn] as Float,
-        real = map[realColumn] as Float,
-        tripsFk = map[tripsFkColumn] as int;
 }
 
 @immutable
@@ -224,20 +304,20 @@ class DatabaseRequirements {
   final int id;
   final String name;
   final bool isDone;
-  final int tripsFk;
+  final int tripFk;
 
   const DatabaseRequirements({
     required this.id,
     required this.name,
     required this.isDone,
-    required this.tripsFk,
+    required this.tripFk,
   });
 
   DatabaseRequirements.fromRow(Map<String, Object> map)
       : id = map[idColumn] as int,
         name = map[nameColumn] as String,
         isDone = (map[isDoneColumn] as int) == 1 ? true : false,
-        tripsFk = map[tripsFkColumn] as int;
+        tripFk = map[tripIdColumn] as int;
 }
 
 const idColumn = "id";
@@ -250,9 +330,9 @@ const dbName = 'trips.db';
 const destinationColumn = 'destination';
 const dateColumn = 'date';
 const noteColumn = 'note';
-const tripsFkColumn = 'trips_fk';
+const tripIdColumn = 'trip_id';
 const activityNameColumn = 'activity';
-
+const costsTableName = 'costs';
 //sqlite create tables
 const createTripsTable = ''' CREATE TABLE IF NOT EXISTS "trips" (
 	"id"	INTEGER NOT NULL UNIQUE,
@@ -266,9 +346,9 @@ const createTripsTable = ''' CREATE TABLE IF NOT EXISTS "trips" (
 const createCostsTable = ''' CREATE TABLE IF NOT EXISTS "costs" (
 	"id"	INTEGER NOT NULL UNIQUE,
   "activity"	TEXT,
-	"planned"	NUMERIC,
-	"real"	NUMERIC,
-	"trip_fk"	INTEGER NOT NULL,
+	"planned"	TEXT,
+	"real"	TEXT,
+	"trip_id"	INTEGER NOT NULL,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 ''';
@@ -277,7 +357,7 @@ const createRequirementsTable = '''CREATE TABLE IF NOT EXISTS  "requirements" (
 	"id"	INTEGER NOT NULL UNIQUE,
 	"name"	TEXT NOT NULL,
 	"is_done"	INTEGER NOT NULL DEFAULT 0,
-	"trips_fk"	INTEGER NOT NULL,
+	"trip_id"	INTEGER NOT NULL,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 ''';
