@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:tripplanner/services/crud/trips_service.dart';
 import 'package:tripplanner/utilities/get_argument.dart';
+
+typedef CheckboxUpdateCallback = void Function(bool?)?;
 
 class CostView extends StatefulWidget {
   const CostView({super.key});
@@ -13,9 +17,9 @@ class _CostViewState extends State<CostView> {
   List<DataRow> dataRows = [];
   final List<TextEditingController> _textControllers = [];
   late DatabaseTrip _trip;
-  // late DatabaseCost _cost;
   late final TripsService _tripsService;
   bool firstRun = true;
+  late final _width = MediaQuery.of(context).size.width;
 
   @override
   void initState() {
@@ -31,48 +35,43 @@ class _CostViewState extends State<CostView> {
     super.dispose();
   }
 
-  Future<void> firstOpen(
+  void firstOpen(
     BuildContext context,
   ) async {
     if (firstRun) {
-      final trip = _trip;
-      if (trip.costs.isNotEmpty) {
-        for (var previousCost in trip.costs) {
+      // _width = MediaQuery.of(context).size.width;
+      if (_trip.costs.isNotEmpty) {
+        for (var previousCost in _trip.costs) {
           dataRows.add(
-            createRow(
-              context,
-              previousCost,
-            ),
+            createRow(context, previousCost),
           );
         }
-      } else {
-        DatabaseCost newCost = await _tripsService.addCost(trip.id);
-        dataRows.add(
-          // ignore: use_build_context_synchronously
-          createRow(
-            context,
-            newCost,
-          ),
-        );
       }
+      firstRun = false;
     }
-    firstRun = false;
   }
 
   Future<void> updateCost(
       String fieldName, String text, DatabaseCost cost) async {
-    final service = _tripsService;
-    await service.updateCost(
+    await _tripsService.updateCost(
       cost,
       fieldName,
       text,
     );
   }
 
-  DataRow createRow(BuildContext context, DatabaseCost newCost) {
+  Future<void> deleteCost(DatabaseCost cost) async {
+    await _tripsService.deleteCost(cost);
+    dataRows = [];
+    firstRun = true;
+  }
+
+  DataRow createRow(
+    BuildContext context,
+    DatabaseCost newCost,
+  ) {
     final cost = newCost;
 
-    final width = MediaQuery.of(context).size.width;
     TextEditingController activityNameTextController = TextEditingController();
     activityNameTextController.text = cost.activity;
     TextEditingController plannedCostTextController = TextEditingController();
@@ -90,7 +89,7 @@ class _CostViewState extends State<CostView> {
       cells: [
         DataCell(
           SizedBox(
-            width: width * 0.35,
+            width: _width * 0.3,
             child: TextField(
               controller: activityNameTextController,
               decoration: const InputDecoration(
@@ -108,7 +107,7 @@ class _CostViewState extends State<CostView> {
         ),
         DataCell(
           SizedBox(
-            width: width * 0.2,
+            width: _width * 0.15,
             child: TextField(
               controller: plannedCostTextController,
               decoration: const InputDecoration(hintText: 'Planned'),
@@ -116,14 +115,18 @@ class _CostViewState extends State<CostView> {
               textInputAction: TextInputAction.next,
               onChanged: (text) async {
                 plannedCost = double.tryParse(text) ?? double.nan;
-                await updateCost('planned', text, cost);
+                await updateCost(
+                  'planned',
+                  text,
+                  cost,
+                );
               },
             ),
           ),
         ),
         DataCell(
           SizedBox(
-            width: width * 0.2,
+            width: _width * 0.15,
             child: TextField(
               controller: realCostTextController,
               decoration: InputDecoration(
@@ -146,8 +149,24 @@ class _CostViewState extends State<CostView> {
               keyboardType: TextInputType.number,
               onChanged: (text) async {
                 realCost = double.tryParse(text) ?? double.nan;
-                await updateCost('real', text, cost);
+                await updateCost(
+                  'real',
+                  text,
+                  cost,
+                );
               },
+            ),
+          ),
+        ),
+        DataCell(
+          SizedBox(
+            width: _width * 0.1,
+            child: IconButton(
+              onPressed: () async {
+                await deleteCost(cost);
+                setState(() {});
+              },
+              icon: const Icon(Icons.delete_forever),
             ),
           ),
         ),
@@ -161,50 +180,58 @@ class _CostViewState extends State<CostView> {
     if (widgetTrip != null) {
       _trip = widgetTrip;
     }
+    firstOpen(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Trip costs'),
       ),
-      body: FutureBuilder(
-        future: firstOpen(context),
-        builder: (context, snapshot) {
-          return InteractiveViewer(
-            constrained: false,
-            child: DataTable(
-              columnSpacing: 20,
-              columns: const [
-                DataColumn(
-                  label: Expanded(
-                    child: Text(
-                      'Activity',
-                      style: TextStyle(fontStyle: FontStyle.italic),
-                    ),
-                  ),
+      body: InteractiveViewer(
+        constrained: false,
+        child: DataTable(
+          columnSpacing: 20,
+          columns: [
+            DataColumn(
+              label: SizedBox(
+                width: _width * 0.3,
+                child: const Text(
+                  'Activity',
+                  style: TextStyle(fontStyle: FontStyle.italic),
                 ),
-                DataColumn(
-                  label: Expanded(
-                    child: Text(
-                      'Planned',
-                      style: TextStyle(fontStyle: FontStyle.italic),
-                    ),
-                  ),
-                  numeric: true,
-                ),
-                DataColumn(
-                  label: Expanded(
-                    child: Text(
-                      'Real',
-                      style: TextStyle(fontStyle: FontStyle.italic),
-                    ),
-                  ),
-                ),
-              ],
-              rows: dataRows,
+              ),
             ),
-          );
-        },
+            DataColumn(
+              label: SizedBox(
+                width: _width * 0.15,
+                child: const Text(
+                  'Planned',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+              numeric: true,
+            ),
+            DataColumn(
+              label: SizedBox(
+                width: _width * 0.15,
+                child: const Text(
+                  'Real',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+            ),
+            DataColumn(
+              label: SizedBox(
+                width: _width * 0.1,
+                child: const Text(
+                  '',
+                ),
+              ),
+            ),
+          ],
+          rows: dataRows,
+        ),
       ),
       floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
         onPressed: () async {
           DatabaseCost newCost = await _tripsService.addCost(_trip.id);
           setState(

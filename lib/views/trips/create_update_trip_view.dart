@@ -54,12 +54,6 @@ class _CreateUpdateTripViewState extends State<CreateUpdateTripView> {
   }
 
   void _setupTextControllerListener() {
-    _nameTextController.removeListener(
-      () => _textControllerListener(
-        _nameTextController.text,
-        'name',
-      ),
-    );
     _nameTextController.addListener(
       () => _textControllerListener(
         _nameTextController.text,
@@ -67,12 +61,6 @@ class _CreateUpdateTripViewState extends State<CreateUpdateTripView> {
       ),
     );
 
-    _destinationTextController.removeListener(
-      () => _textControllerListener(
-        _destinationTextController.text,
-        'destination',
-      ),
-    );
     _destinationTextController.addListener(
       () => _textControllerListener(
         _destinationTextController.text,
@@ -80,12 +68,6 @@ class _CreateUpdateTripViewState extends State<CreateUpdateTripView> {
       ),
     );
 
-    _dateTextController.removeListener(
-      () => _textControllerListener(
-        _dateTextController.text,
-        'date',
-      ),
-    );
     _dateTextController.addListener(
       () => _textControllerListener(
         _dateTextController.text,
@@ -93,12 +75,6 @@ class _CreateUpdateTripViewState extends State<CreateUpdateTripView> {
       ),
     );
 
-    _noteTextController.removeListener(
-      () => _textControllerListener(
-        _noteTextController.text,
-        'note',
-      ),
-    );
     _noteTextController.addListener(
       () => _textControllerListener(
         _noteTextController.text,
@@ -170,8 +146,6 @@ class _CreateUpdateTripViewState extends State<CreateUpdateTripView> {
                     ),
                   ),
                   TextField(
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
                     decoration: const InputDecoration(
                       hintText: 'Trip costs [.....]',
                       helperText: 'Cost of your trip',
@@ -180,6 +154,19 @@ class _CreateUpdateTripViewState extends State<CreateUpdateTripView> {
                     onTap: () {
                       Navigator.of(context).pushNamed(
                         tripCostRoute,
+                        arguments: _trip,
+                      );
+                    },
+                  ),
+                  TextField(
+                    decoration: const InputDecoration(
+                      hintText: 'Trip requirements [.....]',
+                      helperText: 'Requirements before your trip',
+                    ),
+                    readOnly: true,
+                    onTap: () {
+                      Navigator.of(context).pushNamed(
+                        tripRequirementsRoute,
                         arguments: _trip,
                       );
                     },

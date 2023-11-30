@@ -25,7 +25,7 @@ class TripsService {
 
   Stream<List<DatabaseTrip>> get allTrips => _tripsStreamController.stream;
 
-  Stream<List<DatabaseCost>> get allCosts => _costsStreamController.stream;
+  //Stream<List<DatabaseCost>> get allCosts => _costsStreamController.stream;
 
   Future<Iterable<DatabaseTrip>> getAllTrips() async {
     await _ensureDbIsOpen();
@@ -355,7 +355,7 @@ const createCostsTable = ''' CREATE TABLE IF NOT EXISTS "costs" (
 
 const createRequirementsTable = '''CREATE TABLE IF NOT EXISTS  "requirements" (
 	"id"	INTEGER NOT NULL UNIQUE,
-	"name"	TEXT NOT NULL,
+	"name"	TEXT,
 	"is_done"	INTEGER NOT NULL DEFAULT 0,
 	"trip_id"	INTEGER NOT NULL,
 	PRIMARY KEY("id" AUTOINCREMENT)
