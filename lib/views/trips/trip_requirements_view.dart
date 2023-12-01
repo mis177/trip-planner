@@ -1,4 +1,10 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:tripplanner/services/crud/trips_service.dart';
+import 'package:tripplanner/utilities/get_argument.dart';
+
+typedef CheckboxUpdateCallback = void Function(bool);
 
 class RequirementsView extends StatefulWidget {
   const RequirementsView({super.key});
@@ -10,13 +16,54 @@ class RequirementsView extends StatefulWidget {
 class _RequirementsViewState extends State<RequirementsView> {
   List<bool> checkboxes = [];
   List<DataRow> dataRows = [];
-  final List<TextEditingController> _textControllers = [];
+  late DatabaseTrip _trip;
+  final Map<int, TextEditingController> _textControllers = {};
+  late final TripsService _tripsService;
+  late final _width = MediaQuery.of(context).size.width;
+
+  @override
+  void initState() {
+    _tripsService = TripsService();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _textControllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void loadExistingRequirements() async {
+    if (_trip.requirements.isNotEmpty) {
+      for (var previousRequirement in _trip.requirements) {
+        dataRows.add(
+          createRow(previousRequirement),
+        );
+      }
+    }
+  }
+
+  Future<void> updateRequirements(
+    DatabaseRequirement requirement,
+    String fieldName,
+    value,
+  ) async {
+    await _tripsService.updateRequirement(
+      requirement,
+      fieldName,
+      value,
+    );
+  }
 
   DataRow createRow(
-    BuildContext context,
+    DatabaseRequirement newRequirement,
   ) {
+    final requirement = newRequirement;
     TextEditingController requirementTextController = TextEditingController();
-    _textControllers.add(requirementTextController);
+    requirementTextController.text = requirement.name;
+    _textControllers[requirement.id] = requirementTextController;
     return DataRow(
       cells: [
         DataCell(
@@ -28,57 +75,76 @@ class _RequirementsViewState extends State<RequirementsView> {
                 hintText: 'requirement',
                 border: UnderlineInputBorder(),
               ),
-              autofocus: true,
               keyboardType: TextInputType.text,
               textInputAction: TextInputAction.next,
               onChanged: (text) async {
-                //await updateCost('activity', text, cost);
+                await updateRequirements(
+                  requirement,
+                  'name',
+                  text,
+                );
               },
             ),
           ),
         ),
-        const DataCell(MyCheckbox()),
+        DataCell(
+          MyCheckbox(
+            onCheckboxUpdate: (isChecked) async {
+              await updateRequirements(
+                requirement,
+                'is_done',
+                isChecked == false ? 0 : 1,
+              );
+            },
+            requirement: requirement,
+          ),
+        ),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final widgetTrip = context.getArgument<DatabaseTrip>();
+    if (widgetTrip != null) {
+      _trip = widgetTrip;
+    }
+    if (dataRows.isEmpty) {
+      loadExistingRequirements();
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('Requirements')),
-      body: InteractiveViewer(
-          constrained: false,
+      body: SingleChildScrollView(
           child: DataTable(
-            columns: const [
-              DataColumn(
-                label: Expanded(
-                  child: Text(
-                    'Requirement',
-                    style: TextStyle(fontStyle: FontStyle.italic),
-                  ),
-                ),
+        columns: const [
+          DataColumn(
+            label: Expanded(
+              child: Text(
+                'Requirement',
+                style: TextStyle(fontStyle: FontStyle.italic),
               ),
-              DataColumn(
-                label: Expanded(
-                  child: Text(
-                    'Done',
-                    style: TextStyle(fontStyle: FontStyle.italic),
-                  ),
-                ),
+            ),
+          ),
+          DataColumn(
+            label: Expanded(
+              child: Text(
+                'Done',
+                style: TextStyle(fontStyle: FontStyle.italic),
               ),
-            ],
-            rows: dataRows,
-          )),
+            ),
+          ),
+        ],
+        rows: dataRows,
+      )),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () async {
-          // DatabaseCost newCost = await _tripsService.addCost(_trip.id);
+          DatabaseRequirement newRequirement =
+              await _tripsService.addRequirement(_trip.id);
           setState(
             () {
               dataRows.add(
-                createRow(
-                  context,
-                ),
+                createRow(newRequirement),
               );
             },
           );
@@ -89,23 +155,24 @@ class _RequirementsViewState extends State<RequirementsView> {
 }
 
 class MyCheckbox extends StatefulWidget {
-  const MyCheckbox({super.key});
-
+  MyCheckbox(
+      {super.key, required this.onCheckboxUpdate, required this.requirement});
+  final CheckboxUpdateCallback onCheckboxUpdate;
+  final DatabaseRequirement requirement;
   @override
   State<MyCheckbox> createState() => _MyCheckboxState();
 }
 
 class _MyCheckboxState extends State<MyCheckbox> {
-  bool isChecked = false;
-
   @override
   Widget build(BuildContext context) {
     return Checkbox(
       activeColor: Colors.green,
-      value: isChecked,
+      value: widget.requirement.isDone,
       onChanged: (bool? value) {
         setState(() {
-          isChecked = value!;
+          widget.requirement.isDone = value!;
+          widget.onCheckboxUpdate(widget.requirement.isDone);
         });
       },
     );

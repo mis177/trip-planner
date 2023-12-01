@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:tripplanner/services/crud/trips_service.dart';
 import 'package:tripplanner/utilities/get_argument.dart';
 
-typedef CheckboxUpdateCallback = void Function(bool?)?;
-
 class CostView extends StatefulWidget {
   const CostView({super.key});
 
@@ -15,10 +13,9 @@ class CostView extends StatefulWidget {
 
 class _CostViewState extends State<CostView> {
   List<DataRow> dataRows = [];
-  final List<TextEditingController> _textControllers = [];
+  final Map<int, List<TextEditingController>> _textControllers = {};
   late DatabaseTrip _trip;
   late final TripsService _tripsService;
-  bool firstRun = true;
   late final _width = MediaQuery.of(context).size.width;
 
   @override
@@ -29,25 +26,21 @@ class _CostViewState extends State<CostView> {
 
   @override
   void dispose() {
-    for (var controller in _textControllers) {
-      controller.dispose();
+    for (var controllers in _textControllers.values) {
+      for (var controller in controllers) {
+        controller.dispose();
+      }
     }
     super.dispose();
   }
 
-  void firstOpen(
-    BuildContext context,
-  ) async {
-    if (firstRun) {
-      // _width = MediaQuery.of(context).size.width;
-      if (_trip.costs.isNotEmpty) {
-        for (var previousCost in _trip.costs) {
-          dataRows.add(
-            createRow(context, previousCost),
-          );
-        }
+  void loadExistingCosts() async {
+    if (_trip.costs.isNotEmpty) {
+      for (var previousCost in _trip.costs) {
+        dataRows.add(
+          createRow(previousCost),
+        );
       }
-      firstRun = false;
     }
   }
 
@@ -62,12 +55,34 @@ class _CostViewState extends State<CostView> {
 
   Future<void> deleteCost(DatabaseCost cost) async {
     await _tripsService.deleteCost(cost);
+    for (var controller in _textControllers[cost.id]!) {
+      controller.dispose();
+      _textControllers.remove(cost.id);
+    }
     dataRows = [];
-    firstRun = true;
+  }
+
+  Future<void> deleteAllCosts() async {
+    List<DatabaseCost> toRemove = [];
+    for (var cost in _trip.costs) {
+      toRemove.add(cost);
+    }
+    for (var cost in toRemove) {
+      await _tripsService.deleteCost(cost);
+    }
+    for (var controllers in _textControllers.values) {
+      for (var controller in controllers) {
+        controller.dispose();
+      }
+    }
+    _textControllers.clear();
+    dataRows = [];
+    setState(
+      () {},
+    );
   }
 
   DataRow createRow(
-    BuildContext context,
     DatabaseCost newCost,
   ) {
     final cost = newCost;
@@ -79,6 +94,11 @@ class _CostViewState extends State<CostView> {
         cost.planned.isNaN ? '' : cost.planned.toString();
     TextEditingController realCostTextController = TextEditingController();
     realCostTextController.text = cost.real.isNaN ? '' : cost.real.toString();
+    _textControllers[newCost.id] = [
+      activityNameTextController,
+      plannedCostTextController,
+      realCostTextController
+    ];
 
     double plannedCost =
         double.tryParse(plannedCostTextController.text) ?? double.nan;
@@ -96,11 +116,11 @@ class _CostViewState extends State<CostView> {
                 hintText: 'Activity name',
                 border: UnderlineInputBorder(),
               ),
-              autofocus: true,
+              //autofocus: true,
               keyboardType: TextInputType.text,
               textInputAction: TextInputAction.next,
               onChanged: (text) async {
-                await updateCost('activity', text, cost);
+                await updateCost('name', text, cost);
               },
             ),
           ),
@@ -166,7 +186,7 @@ class _CostViewState extends State<CostView> {
                 await deleteCost(cost);
                 setState(() {});
               },
-              icon: const Icon(Icons.delete_forever),
+              icon: const Icon(Icons.delete),
             ),
           ),
         ),
@@ -180,19 +200,21 @@ class _CostViewState extends State<CostView> {
     if (widgetTrip != null) {
       _trip = widgetTrip;
     }
-    firstOpen(context);
+    if (dataRows.isEmpty) {
+      loadExistingCosts();
+    }
+    final width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Trip costs'),
       ),
-      body: InteractiveViewer(
-        constrained: false,
+      body: SingleChildScrollView(
         child: DataTable(
           columnSpacing: 20,
           columns: [
             DataColumn(
               label: SizedBox(
-                width: _width * 0.3,
+                width: width * 0.3,
                 child: const Text(
                   'Activity',
                   style: TextStyle(fontStyle: FontStyle.italic),
@@ -201,7 +223,7 @@ class _CostViewState extends State<CostView> {
             ),
             DataColumn(
               label: SizedBox(
-                width: _width * 0.15,
+                width: width * 0.15,
                 child: const Text(
                   'Planned',
                   style: TextStyle(fontStyle: FontStyle.italic),
@@ -211,7 +233,7 @@ class _CostViewState extends State<CostView> {
             ),
             DataColumn(
               label: SizedBox(
-                width: _width * 0.15,
+                width: width * 0.15,
                 child: const Text(
                   'Real',
                   style: TextStyle(fontStyle: FontStyle.italic),
@@ -220,9 +242,12 @@ class _CostViewState extends State<CostView> {
             ),
             DataColumn(
               label: SizedBox(
-                width: _width * 0.1,
-                child: const Text(
-                  '',
+                width: width * 0.1,
+                child: IconButton(
+                  onPressed: () async {
+                    deleteAllCosts();
+                  },
+                  icon: const Icon(Icons.delete_forever),
                 ),
               ),
             ),
@@ -230,6 +255,10 @@ class _CostViewState extends State<CostView> {
           rows: dataRows,
         ),
       ),
+      //  CostsListView(
+      //   dataRows: dataRows,
+      //   onDeleteAll: deleteAllCosts,
+      // ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () async {
@@ -237,7 +266,7 @@ class _CostViewState extends State<CostView> {
           setState(
             () {
               dataRows.add(
-                createRow(context, newCost),
+                createRow(newCost),
               );
             },
           );
