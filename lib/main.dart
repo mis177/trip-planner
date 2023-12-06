@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:tripplanner/const/routes.dart';
-import 'package:tripplanner/services/crud/trips_service.dart';
-import 'package:tripplanner/views/trips/create_update_trip_view.dart';
+import 'package:tripplanner/services/crud/database_trip_provider.dart';
+import 'package:tripplanner/views/trips/trip_edit_view.dart';
 import 'package:tripplanner/views/trips/trip_cost_view.dart';
 import 'package:tripplanner/views/trips/trip_requirements_view.dart';
 import 'package:tripplanner/views/trips/trips_view.dart';
 
 void main() {
   runApp(const MyApp());
-  TripsService service = TripsService();
+  DatabaseTripsProvider service = DatabaseTripsProvider();
   service.openDb();
 }
 
@@ -25,8 +25,8 @@ class MyApp extends StatelessWidget {
       ),
       home: const HomePage(),
       routes: {
-        createOrUpdateTripRoute: (context) => const CreateUpdateTripView(),
-        tripCostRoute: (context) => const CostView(),
+        // tripEditRoute: (context) => const tripEditRoute(),
+        tripCostRoute: (context) => const CostsView(),
         tripRequirementsRoute: (context) => const RequirementsView(),
       },
     );

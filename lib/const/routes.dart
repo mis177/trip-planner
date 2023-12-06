@@ -1,3 +1,3 @@
-const createOrUpdateTripRoute = 'createOrUpdateTripRoute';
+const tripEditRoute = 'tripEditRoute';
 const tripCostRoute = 'tripCostRoute';
 const tripRequirementsRoute = 'tripRequirementsRoute';

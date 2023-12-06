@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tripplanner/const/routes.dart';
-import 'package:tripplanner/services/crud/trips_service.dart';
+import 'package:tripplanner/models/trips.dart';
+import 'package:tripplanner/services/crud/database_trip_provider.dart';
 import 'package:tripplanner/views/trips/trips_list_view.dart';
 
 class TripsView extends StatefulWidget {
@@ -11,11 +12,11 @@ class TripsView extends StatefulWidget {
 }
 
 class _TripsViewState extends State<TripsView> {
-  late final TripsService _tripsService;
+  late final DatabaseTripsProvider _tripsService;
 
   @override
   void initState() {
-    _tripsService = TripsService();
+    _tripsService = DatabaseTripsProvider();
     super.initState();
   }
 
@@ -28,7 +29,7 @@ class _TripsViewState extends State<TripsView> {
           IconButton(
             onPressed: () async {
               //await _tripsService.addTrip();
-              Navigator.of(context).pushNamed(createOrUpdateTripRoute);
+              Navigator.of(context).pushNamed(tripEditRoute);
             },
             icon: const Icon(Icons.add),
           ),
@@ -49,7 +50,7 @@ class _TripsViewState extends State<TripsView> {
                   },
                   onTapTrip: (trip) async {
                     Navigator.of(context).pushNamed(
-                      createOrUpdateTripRoute,
+                      tripEditRoute,
                       arguments: trip,
                     );
                   },

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tripplanner/services/crud/trips_service.dart';
+import 'package:tripplanner/models/trips.dart';
 
 typedef TripCallback = void Function(DatabaseTrip trip);
 

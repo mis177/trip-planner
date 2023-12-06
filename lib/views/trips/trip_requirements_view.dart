@@ -1,8 +1,12 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
-import 'package:tripplanner/services/crud/trips_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tripplanner/bloc/trip_requirement/trip_requirement_bloc.dart';
+import 'package:tripplanner/bloc/trip_requirement/trip_requirement_event.dart';
+import 'package:tripplanner/bloc/trip_requirement/trip_requirement_state.dart';
+import 'package:tripplanner/bloc/trip_requirement/trip_requirements_utils.dart';
+import 'package:tripplanner/models/trips.dart';
 import 'package:tripplanner/utilities/get_argument.dart';
+import 'package:tripplanner/utilities/loading_screen/loading_screen.dart';
 
 typedef CheckboxUpdateCallback = void Function(bool);
 
@@ -14,167 +18,191 @@ class RequirementsView extends StatefulWidget {
 }
 
 class _RequirementsViewState extends State<RequirementsView> {
-  List<bool> checkboxes = [];
-  List<DataRow> dataRows = [];
-  late DatabaseTrip _trip;
-  final Map<int, TextEditingController> _textControllers = {};
-  late final TripsService _tripsService;
-  late final _width = MediaQuery.of(context).size.width;
-
-  @override
-  void initState() {
-    _tripsService = TripsService();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    for (var controller in _textControllers.values) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
-  void loadExistingRequirements() async {
-    if (_trip.requirements.isNotEmpty) {
-      for (var previousRequirement in _trip.requirements) {
-        dataRows.add(
-          createRow(previousRequirement),
-        );
-      }
-    }
-  }
-
-  Future<void> updateRequirements(
-    DatabaseRequirement requirement,
-    String fieldName,
-    value,
-  ) async {
-    await _tripsService.updateRequirement(
-      requirement,
-      fieldName,
-      value,
-    );
-  }
-
-  DataRow createRow(
-    DatabaseRequirement newRequirement,
-  ) {
-    final requirement = newRequirement;
-    TextEditingController requirementTextController = TextEditingController();
-    requirementTextController.text = requirement.name;
-    _textControllers[requirement.id] = requirementTextController;
-    return DataRow(
-      cells: [
-        DataCell(
-          SizedBox(
-            //width: width * 0.35,
-            child: TextField(
-              controller: requirementTextController,
-              decoration: const InputDecoration(
-                hintText: 'requirement',
-                border: UnderlineInputBorder(),
-              ),
-              keyboardType: TextInputType.text,
-              textInputAction: TextInputAction.next,
-              onChanged: (text) async {
-                await updateRequirements(
-                  requirement,
-                  'name',
-                  text,
-                );
-              },
-            ),
-          ),
-        ),
-        DataCell(
-          MyCheckbox(
-            onCheckboxUpdate: (isChecked) async {
-              await updateRequirements(
-                requirement,
-                'is_done',
-                isChecked == false ? 0 : 1,
-              );
-            },
-            requirement: requirement,
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final widgetTrip = context.getArgument<DatabaseTrip>();
-    if (widgetTrip != null) {
-      _trip = widgetTrip;
-    }
-    if (dataRows.isEmpty) {
-      loadExistingRequirements();
-    }
-    return Scaffold(
-      appBar: AppBar(title: const Text('Requirements')),
-      body: SingleChildScrollView(
-          child: DataTable(
-        columns: const [
-          DataColumn(
-            label: Expanded(
-              child: Text(
-                'Requirement',
-                style: TextStyle(fontStyle: FontStyle.italic),
-              ),
-            ),
-          ),
-          DataColumn(
-            label: Expanded(
-              child: Text(
-                'Done',
-                style: TextStyle(fontStyle: FontStyle.italic),
-              ),
-            ),
-          ),
-        ],
-        rows: dataRows,
-      )),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () async {
-          DatabaseRequirement newRequirement =
-              await _tripsService.addRequirement(_trip.id);
-          setState(
-            () {
-              dataRows.add(
-                createRow(newRequirement),
-              );
-            },
-          );
-        },
+    return BlocProvider(
+      create: (context) => TripRequirementBloc(
+        TripRequirementUtils(),
+      ),
+      child: const RequirementsListView(),
+    );
+  }
+}
+
+class RequirementsListView extends StatefulWidget {
+  const RequirementsListView({super.key});
+
+  @override
+  State<RequirementsListView> createState() => _RequirementsListViewState();
+}
+
+class _RequirementsListViewState extends State<RequirementsListView> {
+  void showSnackBar(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.green,
+        content: Text(text),
+        duration: const Duration(milliseconds: 350),
       ),
     );
   }
-}
 
-class MyCheckbox extends StatefulWidget {
-  MyCheckbox(
-      {super.key, required this.onCheckboxUpdate, required this.requirement});
-  final CheckboxUpdateCallback onCheckboxUpdate;
-  final DatabaseRequirement requirement;
-  @override
-  State<MyCheckbox> createState() => _MyCheckboxState();
-}
-
-class _MyCheckboxState extends State<MyCheckbox> {
   @override
   Widget build(BuildContext context) {
-    return Checkbox(
-      activeColor: Colors.green,
-      value: widget.requirement.isDone,
-      onChanged: (bool? value) {
-        setState(() {
-          widget.requirement.isDone = value!;
-          widget.onCheckboxUpdate(widget.requirement.isDone);
-        });
-      },
-    );
+    return BlocConsumer<TripRequirementBloc, TripRequirementState>(
+        listener: (context, state) {
+      if (state is TripRequirementAddSuccess) {
+        showSnackBar('Requirement added');
+      } else if (state is TripRequirementDeleteSuccess) {
+        showSnackBar('Requirement deleted');
+      } else if (state is TripRequirementDeleteAllSuccess) {
+        showSnackBar('All requirements deleted');
+      }
+
+      if (state.isLoading) {
+        LoadingScreen().show(context: context, text: state.loadingText);
+      } else {
+        LoadingScreen().hide();
+      }
+    }, builder: (context, state) {
+      if (state is TripRequirementInitial) {
+        context.read<TripRequirementBloc>().add(
+            TripRequirementLoadAll(trip: context.getArgument<DatabaseTrip>()!));
+        return const CircularProgressIndicator();
+      } else if (state is TripRequirementLoadSuccess) {
+        late final width = MediaQuery.of(context).size.width;
+
+        return Scaffold(
+          appBar: AppBar(title: const Text('Requirements')),
+          body: SingleChildScrollView(
+            child: DataTable(
+              columnSpacing: 20,
+              columns: [
+                DataColumn(
+                  label: SizedBox(
+                    width: width * 0.5,
+                    child: const Center(
+                      child: Text(
+                        'Requirement',
+                        style: TextStyle(fontStyle: FontStyle.italic),
+                      ),
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: SizedBox(
+                    width: width * 0.2,
+                    child: const Center(
+                      child: Text(
+                        'Done',
+                        style: TextStyle(fontStyle: FontStyle.italic),
+                      ),
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: SizedBox(
+                    width: width * 0.1,
+                    child: IconButton(
+                      onPressed: () async {
+                        context.read<TripRequirementBloc>().add(
+                            TripRequirementRemoveAll(
+                                trip: context.getArgument<DatabaseTrip>()!));
+                      },
+                      icon: const Icon(Icons.delete_forever),
+                    ),
+                  ),
+                ),
+              ],
+              rows: state.dataRows.map(
+                (requirement) {
+                  final width = MediaQuery.of(context).size.width;
+                  return DataRow(
+                    cells: [
+                      DataCell(
+                        SizedBox(
+                          width: width * 0.5,
+                          child: Center(
+                            child: TextFormField(
+                              initialValue: requirement.name,
+                              textAlign: TextAlign.center,
+                              decoration: const InputDecoration(
+                                hintText: 'requirement',
+                                border: UnderlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.multiline,
+                              maxLines: null,
+                              textInputAction: TextInputAction.next,
+                              onChanged: (text) async {
+                                context
+                                    .read<TripRequirementBloc>()
+                                    .add(TripRequirementUpdate(
+                                      fieldName: 'name',
+                                      text: text,
+                                      trip:
+                                          context.getArgument<DatabaseTrip>()!,
+                                      requirement: requirement,
+                                    ));
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        SizedBox(
+                          width: width * 0.2,
+                          child: Checkbox(
+                            activeColor: Colors.green,
+                            value: requirement.isDone,
+                            onChanged: (bool? value) {
+                              print(value);
+                              requirement.isDone = value!;
+                              context
+                                  .read<TripRequirementBloc>()
+                                  .add(TripRequirementUpdate(
+                                    trip: context.getArgument<DatabaseTrip>()!,
+                                    requirement: requirement,
+                                    fieldName: 'is_done',
+                                    text: value.toString(),
+                                  ));
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        SizedBox(
+                          width: width * 0.1,
+                          child: IconButton(
+                            onPressed: () async {
+                              context
+                                  .read<TripRequirementBloc>()
+                                  .add(TripRequirementRemove(
+                                    trip: context.getArgument<DatabaseTrip>()!,
+                                    requirement: requirement,
+                                  ));
+                            },
+                            icon: const Icon(Icons.delete),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ).toList(),
+            ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: () async {
+              context.read<TripRequirementBloc>().add(TripRequirementAdd(
+                  trip: context.getArgument<DatabaseTrip>()!));
+            },
+          ),
+        );
+      } else {
+        return const CircularProgressIndicator();
+      }
+    });
   }
 }

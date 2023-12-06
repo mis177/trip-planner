@@ -3,16 +3,18 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:tripplanner/models/trips.dart';
 import 'package:tripplanner/services/crud/crud_exceptions.dart';
 
-class TripsService {
+class DatabaseTripsProvider {
   Database? _db;
   List<DatabaseTrip> _trips = [];
   late final StreamController<List<DatabaseTrip>> _tripsStreamController;
   // singleton
-  factory TripsService() => _instance;
-  static final TripsService _instance = TripsService._internal();
-  TripsService._internal() {
+  factory DatabaseTripsProvider() => _instance;
+  static final DatabaseTripsProvider _instance =
+      DatabaseTripsProvider._internal();
+  DatabaseTripsProvider._internal() {
     _tripsStreamController = StreamController<List<DatabaseTrip>>.broadcast(
       onListen: () {
         _tripsStreamController.sink.add(_trips);
@@ -115,16 +117,19 @@ class TripsService {
     _tripsStreamController.add(_trips);
   }
 
+  DatabaseTrip getTrip(int id) {
+    return _trips.where((trip) => trip.id == id).first;
+  }
+
   Future<void> cacheTrips() async {
     final trips = await getAllTrips();
     _trips = trips.toList();
     _tripsStreamController.add(_trips);
   }
 
-  Future<DatabaseCost> addCost(int tripId) async {
+  Future<void> addCost(int tripId) async {
     await _ensureDbIsOpen();
     final db = getDatabase();
-
     DatabaseCost newCost = DatabaseCost(
         id: DateTime.now().microsecondsSinceEpoch,
         activity: '',
@@ -140,7 +145,6 @@ class TripsService {
     });
 
     _trips.singleWhere((element) => element.id == tripId).costs.add(newCost);
-    return newCost;
   }
 
   Future<void> updateCost(DatabaseCost cost, String field, value) async {
@@ -243,6 +247,21 @@ class TripsService {
     }
   }
 
+  Future<void> deleteRequirement(DatabaseRequirement requirement) async {
+    await _ensureDbIsOpen();
+    final db = getDatabase();
+    await db.delete(
+      requirementsTableName,
+      where: 'id = ?',
+      whereArgs: [requirement.id],
+    );
+    _trips
+        .where((element) => element.id == requirement.tripID)
+        .first
+        .requirements
+        .remove(requirement);
+  }
+
   Future<void> openDb() async {
     //await _db!.query('DROP TABLE IF EXISTS trips');
     if (_db == null) {
@@ -288,89 +307,6 @@ class TripsService {
   }
 }
 
-class DatabaseTrip {
-  int id;
-  String name;
-  String destination;
-  List<DatabaseCost> costs;
-  List<DatabaseRequirement> requirements;
-  String date;
-  String note;
-
-  DatabaseTrip({
-    required this.id,
-    required this.name,
-    required this.destination,
-    required this.date,
-    required this.note,
-    required this.costs,
-    required this.requirements,
-  });
-
-  DatabaseTrip.fromRow(Map<String, Object?> map,
-      List<Map<String, Object?>> costs, List<Map<String, Object?>> requirements)
-      : id = map[idColumn] as int,
-        name = map[nameColumn] as String,
-        destination = map[destinationColumn] as String,
-        date = map[dateColumn] as String,
-        note = map[noteColumn] as String,
-        costs = costs
-            .map((e) => DatabaseCost(
-                  id: e[idColumn] as int,
-                  activity: e[nameColumn] as String,
-                  planned: (double.tryParse(e[plannedColumn].toString()) ??
-                      double.nan),
-                  real:
-                      (double.tryParse(e[realColumn].toString()) ?? double.nan),
-                  tripID: e[tripIdColumn] as int,
-                ))
-            .toList(),
-        requirements = requirements
-            .map((e) => DatabaseRequirement(
-                  id: e[idColumn] as int,
-                  name: e[nameColumn] as String,
-                  isDone: (e[isDoneColumn] as int) == 1 ? true : false,
-                  tripID: e[tripIdColumn] as int,
-                ))
-            .toList();
-
-  @override
-  bool operator ==(covariant DatabaseTrip other) => name == other.name;
-
-  @override
-  int get hashCode => name.hashCode;
-}
-
-class DatabaseCost {
-  final int id;
-  String activity;
-  double planned;
-  double real;
-  int tripID;
-
-  DatabaseCost({
-    required this.id,
-    required this.activity,
-    required this.planned,
-    required this.real,
-    required this.tripID,
-  });
-}
-
-class DatabaseRequirement {
-  final int id;
-  String name;
-  bool isDone;
-  int tripID;
-
-  DatabaseRequirement({
-    required this.id,
-    required this.name,
-    required this.isDone,
-    required this.tripID,
-  });
-}
-
 const dbName = 'trips.db';
 const idColumn = "id";
 const nameColumn = "name";
@@ -380,7 +316,6 @@ const realColumn = "real";
 const destinationColumn = 'destination';
 const dateColumn = 'date';
 const noteColumn = 'note';
-const tripIdColumn = 'trip_id';
 const tripsTableName = "trips";
 const costsTableName = 'costs';
 const requirementsTableName = 'requirements';
