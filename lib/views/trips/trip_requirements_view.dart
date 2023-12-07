@@ -155,7 +155,6 @@ class _RequirementsListViewState extends State<RequirementsListView> {
                             activeColor: Colors.green,
                             value: requirement.isDone,
                             onChanged: (bool? value) {
-                              print(value);
                               requirement.isDone = value!;
                               context
                                   .read<TripRequirementBloc>()

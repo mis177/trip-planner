@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:tripplanner/models/trips.dart';
 
 sealed class TripEditState extends Equatable {
   final bool isLoading;
@@ -18,7 +19,14 @@ class TripEditLoadInProgress extends TripEditState {
 }
 
 class TripEditLoadSuccess extends TripEditState {
-  const TripEditLoadSuccess({super.isLoading, super.loadingText});
+  final DatabaseTrip trip;
+  const TripEditLoadSuccess({
+    super.isLoading,
+    super.loadingText,
+    required this.trip,
+  });
+  @override
+  List<Object?> get props => [trip.id];
 }
 
 class TripEditLoadFailure extends TripEditState {
@@ -37,27 +45,17 @@ class TripEditUpdateFailure extends TripEditState {
   const TripEditUpdateFailure({super.isLoading, super.loadingText});
 }
 
-class TripEditCostsSelectInProgress extends TripEditState {
-  const TripEditCostsSelectInProgress({super.isLoading, super.loadingText});
+class TripEditTableSelect extends TripEditState {
+  final String route;
+  final DatabaseTrip trip;
+  const TripEditTableSelect({
+    super.isLoading,
+    super.loadingText,
+    required this.route,
+    required this.trip,
+  });
 }
 
-class TripEditCostsSelectSuccess extends TripEditState {
-  const TripEditCostsSelectSuccess({super.isLoading, super.loadingText});
-}
-
-class TripEditCostsSelectFailure extends TripEditState {
-  const TripEditCostsSelectFailure({super.isLoading, super.loadingText});
-}
-
-class TripEditRequirementsSelectInProgress extends TripEditState {
-  const TripEditRequirementsSelectInProgress(
-      {super.isLoading, super.loadingText});
-}
-
-class TripEditRequirementsSelectSuccess extends TripEditState {
-  const TripEditRequirementsSelectSuccess({super.isLoading, super.loadingText});
-}
-
-class TripEditRequirementsSelectFailure extends TripEditState {
-  const TripEditRequirementsSelectFailure({super.isLoading, super.loadingText});
+class TripEditTableSelectFailure extends TripEditState {
+  const TripEditTableSelectFailure({super.isLoading, super.loadingText});
 }

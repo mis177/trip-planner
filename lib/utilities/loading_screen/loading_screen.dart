@@ -17,7 +17,7 @@ class LoadingScreen {
     if (controller?.update(text) ?? false) {
       return;
     } else {
-      controller = showOverlay(context: context, text: text);
+      controller = showOverlay(context: context, loadingText: text);
     }
   }
 
@@ -28,15 +28,13 @@ class LoadingScreen {
 
   LoadingScreenController showOverlay({
     required BuildContext context,
-    required String text,
+    required String loadingText,
   }) {
-    final _text = StreamController<String>();
-    _text.add(text);
+    final text = StreamController<String>();
+    text.add(loadingText);
 
     final state = Overlay.of(context);
-    final renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
-
+    final size = MediaQuery.of(context).size;
     final overlay = OverlayEntry(
       opaque: true,
       builder: (context) {
@@ -64,7 +62,7 @@ class LoadingScreen {
                     const CircularProgressIndicator(),
                     const SizedBox(height: 20),
                     StreamBuilder(
-                      stream: _text.stream,
+                      stream: text.stream,
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           return Text(
@@ -88,12 +86,12 @@ class LoadingScreen {
 
     return LoadingScreenController(
       close: () {
-        _text.close();
+        text.close();
         overlay.remove();
         return true;
       },
-      update: (text) {
-        _text.add(text);
+      update: (newText) {
+        text.add(newText);
         return true;
       },
     );

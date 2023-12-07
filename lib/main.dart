@@ -4,7 +4,7 @@ import 'package:tripplanner/services/crud/database_trip_provider.dart';
 import 'package:tripplanner/views/trips/trip_edit_view.dart';
 import 'package:tripplanner/views/trips/trip_cost_view.dart';
 import 'package:tripplanner/views/trips/trip_requirements_view.dart';
-import 'package:tripplanner/views/trips/trips_view.dart';
+import 'package:tripplanner/views/trips/trips_list_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       ),
       home: const HomePage(),
       routes: {
-        // tripEditRoute: (context) => const tripEditRoute(),
+        tripEditRoute: (context) => const TripView(),
         tripCostRoute: (context) => const CostsView(),
         tripRequirementsRoute: (context) => const RequirementsView(),
       },
