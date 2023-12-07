@@ -41,92 +41,92 @@ class _TripsListViewState extends State<TripsListView> {
       SnackBar(
         backgroundColor: Colors.green,
         content: Text(text),
-        duration: const Duration(milliseconds: 350),
+        duration: const Duration(milliseconds: 400),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<TripListBloc, TripListState>(
-      listener: (context, state) {
-        if (state is TripListAddSuccess) {
-          Navigator.of(context)
-              .pushNamed(
-                state.route,
-                arguments: state.trip,
-              )
-              .then((value) => context.read<TripListBloc>().add(
-                    const TripListLoadAll(),
-                  ));
-        } else if (state is TripListClicked) {
-          Navigator.of(context)
-              .pushNamed(
-                state.route,
-                arguments: state.trip,
-              )
-              .then((value) => context.read<TripListBloc>().add(
-                    const TripListLoadAll(),
-                  ));
-        }
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text("Your Trips"),
+          actions: [
+            IconButton(
+              onPressed: () async {
+                context.read<TripListBloc>().add(
+                      const TripListAdd(),
+                    );
+              },
+              icon: const Icon(Icons.add),
+            ),
+          ],
+        ),
+        body: BlocConsumer<TripListBloc, TripListState>(
+          listener: (context, state) {
+            if (state is TripListAddSuccess) {
+              Navigator.of(context)
+                  .pushNamed(
+                    state.route,
+                    arguments: state.trip,
+                  )
+                  .then((value) => context.read<TripListBloc>().add(
+                        const TripListLoadAll(),
+                      ));
+            } else if (state is TripListClicked) {
+              Navigator.of(context)
+                  .pushNamed(
+                    state.route,
+                    arguments: state.trip,
+                  )
+                  .then((value) => context.read<TripListBloc>().add(
+                        const TripListLoadAll(),
+                      ));
+            } else if (state is TripListRemoveSuccess) {
+              showSnackBar('Trip removed');
+            }
 
-        if (state.isLoading) {
-          LoadingScreen().show(context: context, text: state.loadingText);
-        } else {
-          LoadingScreen().hide();
-        }
-      },
-      builder: (context, state) {
-        if (state is TripListInitial) {
-          context.read<TripListBloc>().add(
-                const TripListLoadAll(),
-              );
-          return const CircularProgressIndicator();
-        } else if (state is TripListLoadSuccess) {
-          return Scaffold(
-              appBar: AppBar(
-                title: const Text("Your Trips"),
-                actions: [
-                  IconButton(
-                    onPressed: () async {
-                      context.read<TripListBloc>().add(
-                            const TripListAdd(),
-                          );
-                    },
-                    icon: const Icon(Icons.add),
-                  ),
-                ],
-              ),
-              body: ListView.builder(
-                itemCount: state.allTrips.length,
-                itemBuilder: (context, index) {
-                  final trip = state.allTrips.elementAt(index);
-                  return ListTile(
-                    title: Text(
-                      trip.name,
-                      maxLines: 1,
-                      softWrap: true,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        context.read<TripListBloc>().add(
-                              TripListRemove(trip: trip),
-                            );
-                      },
-                    ),
-                    onTap: () {
-                      context.read<TripListBloc>().add(
-                            TripListTripClick(trip: trip),
-                          );
-                    },
+            if (state.isLoading) {
+              LoadingScreen().show(context: context, text: state.loadingText);
+            } else {
+              LoadingScreen().hide();
+            }
+          },
+          builder: (context, state) {
+            if (state is TripListInitial) {
+              context.read<TripListBloc>().add(
+                    const TripListLoadAll(),
                   );
-                },
-              ));
-        }
-        return Container();
-      },
-    );
+            }
+
+            return ListView.builder(
+              itemCount: state.allTrips.length,
+              itemBuilder: (context, index) {
+                final trip = state.allTrips.elementAt(index);
+                return ListTile(
+                  title: Text(
+                    trip.name,
+                    maxLines: 1,
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      context.read<TripListBloc>().add(
+                            TripListRemove(trip: trip),
+                          );
+                    },
+                  ),
+                  onTap: () {
+                    context.read<TripListBloc>().add(
+                          TripListTripClick(trip: trip),
+                        );
+                  },
+                );
+              },
+            );
+          },
+        ));
   }
 }

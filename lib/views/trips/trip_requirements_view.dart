@@ -49,32 +49,31 @@ class _RequirementsListViewState extends State<RequirementsListView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<TripRequirementBloc, TripRequirementState>(
-        listener: (context, state) {
-      if (state is TripRequirementAddSuccess) {
-        showSnackBar('Requirement added');
-      } else if (state is TripRequirementDeleteSuccess) {
-        showSnackBar('Requirement deleted');
-      } else if (state is TripRequirementDeleteAllSuccess) {
-        showSnackBar('All requirements deleted');
-      }
+    return Scaffold(
+      appBar: AppBar(title: const Text('Requirements')),
+      body: BlocConsumer<TripRequirementBloc, TripRequirementState>(
+          listener: (context, state) {
+        if (state is TripRequirementAddSuccess) {
+          showSnackBar('Requirement added');
+        } else if (state is TripRequirementDeleteSuccess) {
+          showSnackBar('Requirement deleted');
+        } else if (state is TripRequirementDeleteAllSuccess) {
+          showSnackBar('All requirements deleted');
+        }
 
-      if (state.isLoading) {
-        LoadingScreen().show(context: context, text: state.loadingText);
-      } else {
-        LoadingScreen().hide();
-      }
-    }, builder: (context, state) {
-      if (state is TripRequirementInitial) {
-        context.read<TripRequirementBloc>().add(
-            TripRequirementLoadAll(trip: context.getArgument<DatabaseTrip>()!));
-        return const CircularProgressIndicator();
-      } else if (state is TripRequirementLoadSuccess) {
-        late final width = MediaQuery.of(context).size.width;
-
-        return Scaffold(
-          appBar: AppBar(title: const Text('Requirements')),
-          body: SingleChildScrollView(
+        if (state.isLoading) {
+          LoadingScreen().show(context: context, text: state.loadingText);
+        } else {
+          LoadingScreen().hide();
+        }
+      }, builder: (context, state) {
+        if (state is TripRequirementInitial) {
+          context.read<TripRequirementBloc>().add(TripRequirementLoadAll(
+              trip: context.getArgument<DatabaseTrip>()!));
+          return const CircularProgressIndicator();
+        } else if (state is TripRequirementLoadSuccess) {
+          late final width = MediaQuery.of(context).size.width;
+          return SingleChildScrollView(
             child: DataTable(
               columnSpacing: 20,
               columns: [
@@ -190,18 +189,17 @@ class _RequirementsListViewState extends State<RequirementsListView> {
                 },
               ).toList(),
             ),
-          ),
-          floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () async {
-              context.read<TripRequirementBloc>().add(TripRequirementAdd(
-                  trip: context.getArgument<DatabaseTrip>()!));
-            },
-          ),
-        );
-      } else {
+          );
+        }
         return const CircularProgressIndicator();
-      }
-    });
+      }),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: () async {
+          context.read<TripRequirementBloc>().add(
+              TripRequirementAdd(trip: context.getArgument<DatabaseTrip>()!));
+        },
+      ),
+    );
   }
 }

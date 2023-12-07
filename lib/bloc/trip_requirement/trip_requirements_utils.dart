@@ -13,7 +13,7 @@ class TripRequirementUtils {
   }
 
   List<DatabaseRequirement> loadExistingRequirement(DatabaseTrip existingTrip) {
-    var trip = existingTrip;
+    var trip = provider.getTrip(existingTrip.id);
     List<DatabaseRequirement> newDataRows = [];
     if (trip.requirements.isNotEmpty) {
       for (var previousRequirement in trip.requirements) {
@@ -47,7 +47,7 @@ class TripRequirementUtils {
   }
 
   Future<void> deleteAllRequirement(DatabaseTrip existingTrip) async {
-    var trip = existingTrip;
+    var trip = provider.getTrip(existingTrip.id);
     List<DatabaseRequirement> toRemove = [];
     for (var requirement in trip.requirements) {
       toRemove.add(requirement);

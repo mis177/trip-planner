@@ -16,7 +16,7 @@ class TripCostUtils {
   }
 
   List<DatabaseCost> loadExistingCost(DatabaseTrip existingTrip) {
-    var trip = existingTrip;
+    var trip = provider.getTrip(existingTrip.id);
     List<DatabaseCost> newDataRows = [];
 
     if (trip.costs.isNotEmpty) {
@@ -46,7 +46,7 @@ class TripCostUtils {
   }
 
   Future<void> deleteAllCost(DatabaseTrip existingTrip) async {
-    var trip = existingTrip;
+    var trip = provider.getTrip(existingTrip.id);
     List<DatabaseCost> toRemove = [];
     for (var cost in trip.costs) {
       toRemove.add(cost);

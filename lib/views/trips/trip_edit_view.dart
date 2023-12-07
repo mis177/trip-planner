@@ -50,34 +50,33 @@ class _EditTripViewState extends State<EditTripView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<TripEditBloc, TripEditState>(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Your trip')),
+      body: BlocConsumer<TripEditBloc, TripEditState>(
         listener: (context, state) {
-      if (state is TripEditTableSelect) {
-        Navigator.of(context).pushNamed(
-          state.route,
-          arguments: state.trip,
-        );
-      }
+          if (state is TripEditTableSelect) {
+            Navigator.of(context).pushNamed(
+              state.route,
+              arguments: state.trip,
+            );
+          }
 
-      if (state.isLoading) {
-        LoadingScreen().show(context: context, text: state.loadingText);
-      } else {
-        LoadingScreen().hide();
-      }
-    }, builder: (context, state) {
-      if (state is TripEditInitial) {
-        context
-            .read<TripEditBloc>()
-            .add(TripLoad(trip: context.getArgument<DatabaseTrip>()!));
-
-        return const CircularProgressIndicator();
-      } else if (state is TripEditLoadSuccess) {
-        return Scaffold(
-            appBar: AppBar(title: const Text('Your trip')),
-            body: Column(
+          if (state.isLoading) {
+            LoadingScreen().show(context: context, text: state.loadingText);
+          } else {
+            LoadingScreen().hide();
+          }
+        },
+        builder: (context, state) {
+          if (state is TripEditInitial) {
+            context
+                .read<TripEditBloc>()
+                .add(TripLoad(trip: context.getArgument<DatabaseTrip>()!));
+          } else if (state is TripEditLoadSuccess) {
+            return Column(
               children: [
                 TextFormField(
-                  initialValue: state.trip.name,
+                  initialValue: state.trip?.name,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   decoration: const InputDecoration(
@@ -93,7 +92,7 @@ class _EditTripViewState extends State<EditTripView> {
                   },
                 ),
                 TextFormField(
-                  initialValue: state.trip.destination,
+                  initialValue: state.trip?.destination,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   decoration: const InputDecoration(
@@ -109,7 +108,7 @@ class _EditTripViewState extends State<EditTripView> {
                   },
                 ),
                 TextFormField(
-                  initialValue: state.trip.date,
+                  initialValue: state.trip?.date,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   decoration: const InputDecoration(
@@ -125,13 +124,20 @@ class _EditTripViewState extends State<EditTripView> {
                   },
                 ),
                 TextFormField(
-                  initialValue: state.trip.note,
+                  initialValue: state.trip?.note,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   decoration: const InputDecoration(
                     hintText: 'My notes',
                     helperText: 'Your notes',
                   ),
+                  onChanged: (text) {
+                    context.read<TripEditBloc>().add(TripEditUpdate(
+                          fieldName: 'note',
+                          text: text,
+                          trip: context.getArgument<DatabaseTrip>()!,
+                        ));
+                  },
                 ),
                 TextField(
                   decoration: const InputDecoration(
@@ -153,17 +159,20 @@ class _EditTripViewState extends State<EditTripView> {
                   ),
                   readOnly: true,
                   onTap: () {
-                    context.read<TripEditBloc>().add(TripEditTablePressed(
-                          route: tripRequirementsRoute,
-                          trip: context.getArgument<DatabaseTrip>()!,
-                        ));
+                    context.read<TripEditBloc>().add(
+                          TripEditTablePressed(
+                            route: tripRequirementsRoute,
+                            trip: context.getArgument<DatabaseTrip>()!,
+                          ),
+                        );
                   },
                 ),
               ],
-            ));
-      } else {
-        return const CircularProgressIndicator();
-      }
-    });
+            );
+          }
+          return const Text('Error');
+        },
+      ),
+    );
   }
 }

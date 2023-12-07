@@ -127,7 +127,7 @@ class DatabaseTripsProvider {
     _tripsStreamController.add(_trips);
   }
 
-  Future<void> addCost(int tripId) async {
+  Future<DatabaseCost> addCost(int tripId) async {
     await _ensureDbIsOpen();
     final db = getDatabase();
     DatabaseCost newCost = DatabaseCost(
@@ -145,6 +145,7 @@ class DatabaseTripsProvider {
     });
 
     _trips.singleWhere((element) => element.id == tripId).costs.add(newCost);
+    return newCost;
   }
 
   Future<void> updateCost(DatabaseCost cost, String field, value) async {

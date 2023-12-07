@@ -4,31 +4,38 @@ import 'package:tripplanner/models/trips.dart';
 sealed class TripListState extends Equatable {
   final bool isLoading;
   final String loadingText;
-  const TripListState(
-      {this.loadingText = 'Please wait a moment', this.isLoading = false});
+  final List<DatabaseTrip> allTrips;
+  const TripListState({
+    this.loadingText = 'Please wait a moment',
+    this.isLoading = false,
+    this.allTrips = const [],
+  });
   @override
   List<Object?> get props => [];
 }
 
 class TripListInitial extends TripListState {
-  const TripListInitial({super.loadingText, super.isLoading});
+  const TripListInitial({super.loadingText, super.isLoading, super.allTrips});
 }
 
 class TripListLoadInProgress extends TripListState {
-  const TripListLoadInProgress({super.loadingText, super.isLoading});
+  const TripListLoadInProgress(
+      {super.loadingText, super.isLoading, super.allTrips});
 }
 
 class TripListLoadSuccess extends TripListState {
-  final List<DatabaseTrip> allTrips;
-  const TripListLoadSuccess({required this.allTrips});
+  const TripListLoadSuccess(
+      {super.loadingText, super.isLoading, super.allTrips});
 }
 
 class TripListLoadFailure extends TripListState {
-  const TripListLoadFailure({super.isLoading, super.loadingText});
+  const TripListLoadFailure(
+      {super.loadingText, super.isLoading, super.allTrips});
 }
 
 class TripListAddInProgress extends TripListState {
-  const TripListAddInProgress({super.isLoading, super.loadingText});
+  const TripListAddInProgress(
+      {super.loadingText, super.isLoading, super.allTrips});
 }
 
 class TripListAddSuccess extends TripListState {
@@ -39,23 +46,28 @@ class TripListAddSuccess extends TripListState {
     required this.trip,
     super.isLoading,
     super.loadingText,
+    super.allTrips,
   });
 }
 
 class TripListAddFailure extends TripListState {
-  const TripListAddFailure({super.isLoading, super.loadingText});
+  const TripListAddFailure(
+      {super.loadingText, super.isLoading, super.allTrips});
 }
 
 class TripListRemoveInProgress extends TripListState {
-  const TripListRemoveInProgress({super.isLoading, super.loadingText});
+  const TripListRemoveInProgress(
+      {super.loadingText, super.isLoading, super.allTrips});
 }
 
 class TripListRemoveSuccess extends TripListState {
-  const TripListRemoveSuccess({super.isLoading, super.loadingText});
+  const TripListRemoveSuccess(
+      {super.loadingText, super.isLoading, super.allTrips});
 }
 
 class TripListRemoveFailure extends TripListState {
-  const TripListRemoveFailure({super.isLoading, super.loadingText});
+  const TripListRemoveFailure(
+      {super.loadingText, super.isLoading, super.allTrips});
 }
 
 class TripListClicked extends TripListState {
@@ -66,9 +78,11 @@ class TripListClicked extends TripListState {
     super.loadingText,
     required this.route,
     required this.trip,
+    super.allTrips,
   });
 }
 
 class TripListClickFailure extends TripListState {
-  const TripListClickFailure({super.isLoading, super.loadingText});
+  const TripListClickFailure(
+      {super.loadingText, super.isLoading, super.allTrips});
 }

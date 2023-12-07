@@ -5,7 +5,8 @@ import 'package:tripplanner/bloc/trip_edit/trip_edit_utils.dart';
 
 class TripEditBloc extends Bloc<TripEditEvent, TripEditState> {
   TripEditBloc(TripEditUtils utils)
-      : super(const TripEditInitial(isLoading: false)) {
+      : super(const TripEditInitial(
+            isLoading: true, loadingText: 'Loading trip...')) {
     on<TripLoad>(
       (event, emit) async {
         Stopwatch stopwatch = Stopwatch()..start();

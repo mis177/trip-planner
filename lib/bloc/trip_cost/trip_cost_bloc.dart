@@ -81,7 +81,8 @@ class TripCostBloc extends Bloc<TripCostEvent, TripCostState> {
             Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
       }
       emit(const TripCostDeleteAllSuccess(isLoading: false));
-      emit(const TripCostLoadSuccess(dataRows: [], isLoading: false));
+      List<DatabaseCost> dataRows = utils.loadExistingCost(event.trip);
+      emit(TripCostLoadSuccess(dataRows: dataRows, isLoading: false));
     });
   }
 }

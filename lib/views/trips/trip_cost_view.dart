@@ -47,34 +47,34 @@ class _CostsListViewState extends State<CostsListView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<TripCostBloc, TripCostState>(
-        listener: (context, state) {
-      if (state is TripCostAddSuccess) {
-        showSnackBar('Cost added');
-      } else if (state is TripCostDeleteSuccess) {
-        showSnackBar('Cost deleted');
-      } else if (state is TripCostDeleteAllSuccess) {
-        showSnackBar('All costs deleted');
-      }
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Trip costs'),
+      ),
+      body:
+          BlocConsumer<TripCostBloc, TripCostState>(listener: (context, state) {
+        if (state is TripCostAddSuccess) {
+          showSnackBar('Cost added');
+        } else if (state is TripCostDeleteSuccess) {
+          showSnackBar('Cost deleted');
+        } else if (state is TripCostDeleteAllSuccess) {
+          showSnackBar('All costs deleted');
+        }
 
-      if (state.isLoading) {
-        LoadingScreen().show(context: context, text: state.loadingText);
-      } else {
-        LoadingScreen().hide();
-      }
-    }, builder: (context, state) {
-      if (state is TripCostInitial) {
-        context
-            .read<TripCostBloc>()
-            .add(TripCostLoadAll(trip: context.getArgument<DatabaseTrip>()!));
-        return const CircularProgressIndicator();
-      } else if (state is TripCostLoadSuccess) {
-        late final width = MediaQuery.of(context).size.width;
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Trip costs'),
-          ),
-          body: SingleChildScrollView(
+        if (state.isLoading) {
+          LoadingScreen().show(context: context, text: state.loadingText);
+        } else {
+          LoadingScreen().hide();
+        }
+      }, builder: (context, state) {
+        if (state is TripCostInitial) {
+          context
+              .read<TripCostBloc>()
+              .add(TripCostLoadAll(trip: context.getArgument<DatabaseTrip>()!));
+        } else if (state is TripCostLoadSuccess) {
+          late final width = MediaQuery.of(context).size.width;
+
+          return SingleChildScrollView(
             child: DataTable(
               columnSpacing: 20,
               columns: [
@@ -238,19 +238,18 @@ class _CostsListViewState extends State<CostsListView> {
                 },
               ).toList(),
             ),
-          ),
-          floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () async {
-              context
-                  .read<TripCostBloc>()
-                  .add(TripCostAdd(trip: context.getArgument<DatabaseTrip>()!));
-            },
-          ),
-        );
-      } else {
-        return Container();
-      }
-    });
+          );
+        }
+        return const CircularProgressIndicator();
+      }),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: () async {
+          context
+              .read<TripCostBloc>()
+              .add(TripCostAdd(trip: context.getArgument<DatabaseTrip>()!));
+        },
+      ),
+    );
   }
 }
