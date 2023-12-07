@@ -4,6 +4,7 @@ import 'package:tripplanner/bloc/trip_list/trip_list_event.dart';
 import 'package:tripplanner/bloc/trip_list/trip_list_state.dart';
 import 'package:tripplanner/const/routes.dart';
 import 'package:tripplanner/models/trips.dart';
+import 'package:tripplanner/utilities/dialogs/confirmation_dialog.dart';
 
 class TripListBloc extends Bloc<TripListEvent, TripListState> {
   TripListBloc(TripListUtils utils)
@@ -46,18 +47,25 @@ class TripListBloc extends Bloc<TripListEvent, TripListState> {
     });
 
     on<TripListRemove>((event, emit) async {
+      final shouldDelete = await showConfirmationDialog(
+        context: event.context,
+        title: 'Trip delete',
+        content: 'Are you sure that you want to delete this trip?',
+      );
       Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripListRemoveInProgress(
-          isLoading: true, loadingText: 'Deleting trip...'));
-      await utils.deleteTrip(event.trip);
+      if (shouldDelete == true) {
+        emit(const TripListRemoveInProgress(
+            isLoading: true, loadingText: 'Deleting trip...'));
+        await utils.deleteTrip(event.trip);
 
-      emit(const TripListRemoveSuccess());
-      emit(const TripListInitial(
-          isLoading: true, loadingText: 'Loading trips...'));
-      //simulating complex compution
-      if (stopwatch.elapsed.inMilliseconds < 250) {
-        await Future.delayed(
-            Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
+        emit(const TripListRemoveSuccess());
+        emit(const TripListInitial(
+            isLoading: true, loadingText: 'Loading trips...'));
+        //simulating complex compution
+        if (stopwatch.elapsed.inMilliseconds < 250) {
+          await Future.delayed(
+              Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
+        }
       }
     });
 

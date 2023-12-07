@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:tripplanner/models/trips.dart';
 
 sealed class TripCostEvent extends Equatable {
@@ -57,8 +58,9 @@ class TripCostRemove extends TripCostEvent {
 
 class TripCostRemoveAll extends TripCostEvent {
   final DatabaseTrip trip;
+  final BuildContext context;
 
-  const TripCostRemoveAll({required this.trip});
+  const TripCostRemoveAll({required this.trip, required this.context});
   @override
   List<Object?> get props => [trip.id];
 }

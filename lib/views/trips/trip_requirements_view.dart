@@ -106,7 +106,8 @@ class _RequirementsListViewState extends State<RequirementsListView> {
                       onPressed: () async {
                         context.read<TripRequirementBloc>().add(
                             TripRequirementRemoveAll(
-                                trip: context.getArgument<DatabaseTrip>()!));
+                                trip: context.getArgument<DatabaseTrip>()!,
+                                context: context));
                       },
                       icon: const Icon(Icons.delete_forever),
                     ),

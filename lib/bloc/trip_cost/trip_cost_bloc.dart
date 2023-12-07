@@ -3,6 +3,7 @@ import 'package:tripplanner/bloc/trip_cost/trip_cost_state.dart';
 import 'package:bloc/bloc.dart';
 import 'package:tripplanner/models/trips.dart';
 import 'package:tripplanner/bloc/trip_cost/trip_costs_utils.dart';
+import 'package:tripplanner/utilities/dialogs/confirmation_dialog.dart';
 
 class TripCostBloc extends Bloc<TripCostEvent, TripCostState> {
   TripCostBloc(TripCostUtils utils)
@@ -70,19 +71,26 @@ class TripCostBloc extends Bloc<TripCostEvent, TripCostState> {
     });
 
     on<TripCostRemoveAll>((event, emit) async {
-      Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripCostDeleteAllInProgress(
-        isLoading: true,
-        loadingText: 'Deleting all costs',
-      ));
-      await utils.deleteAllCost(event.trip);
-      if (stopwatch.elapsed.inMilliseconds < 250) {
-        await Future.delayed(
-            Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
+      final shouldDelete = await showConfirmationDialog(
+        context: event.context,
+        title: 'Costs delete',
+        content: 'Are you sure that you want to delete all costs?',
+      );
+      if (shouldDelete == true) {
+        Stopwatch stopwatch = Stopwatch()..start();
+        emit(const TripCostDeleteAllInProgress(
+          isLoading: true,
+          loadingText: 'Deleting all costs',
+        ));
+        await utils.deleteAllCost(event.trip);
+        if (stopwatch.elapsed.inMilliseconds < 250) {
+          await Future.delayed(
+              Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
+        }
+        emit(const TripCostDeleteAllSuccess(isLoading: false));
+        List<DatabaseCost> dataRows = utils.loadExistingCost(event.trip);
+        emit(TripCostLoadSuccess(dataRows: dataRows, isLoading: false));
       }
-      emit(const TripCostDeleteAllSuccess(isLoading: false));
-      List<DatabaseCost> dataRows = utils.loadExistingCost(event.trip);
-      emit(TripCostLoadSuccess(dataRows: dataRows, isLoading: false));
     });
   }
 }

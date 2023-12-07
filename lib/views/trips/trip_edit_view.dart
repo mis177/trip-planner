@@ -38,6 +38,7 @@ class EditTripView extends StatefulWidget {
 }
 
 class _EditTripViewState extends State<EditTripView> {
+  late final TextEditingController dateController;
   void showSnackBar(String text) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -49,9 +50,39 @@ class _EditTripViewState extends State<EditTripView> {
   }
 
   @override
+  void initState() {
+    dateController = TextEditingController();
+    dateController.addListener(() {
+      context.read<TripEditBloc>().add(TripEditUpdate(
+            fieldName: 'date',
+            text: dateController.text,
+            trip: context.getArgument<DatabaseTrip>()!,
+          ));
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    dateController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Your trip')),
+      appBar: AppBar(
+        title: const Text('Your trip'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<TripEditBloc>().add(TripEditSharePressed(
+                  trip: context.getArgument<DatabaseTrip>()!));
+            },
+            icon: const Icon(Icons.share),
+          ),
+        ],
+      ),
       body: BlocConsumer<TripEditBloc, TripEditState>(
         listener: (context, state) {
           if (state is TripEditTableSelect) {
@@ -73,6 +104,7 @@ class _EditTripViewState extends State<EditTripView> {
                 .read<TripEditBloc>()
                 .add(TripLoad(trip: context.getArgument<DatabaseTrip>()!));
           } else if (state is TripEditLoadSuccess) {
+            dateController.text = state.trip!.date;
             return Column(
               children: [
                 TextFormField(
@@ -107,20 +139,27 @@ class _EditTripViewState extends State<EditTripView> {
                         ));
                   },
                 ),
-                TextFormField(
-                  initialValue: state.trip?.date,
+                TextField(
+                  //     initialValue: state.trip?.date,
+                  controller: dateController,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   decoration: const InputDecoration(
                     hintText: 'Trip date',
                     helperText: 'Date of your trip',
                   ),
-                  onChanged: (text) {
-                    context.read<TripEditBloc>().add(TripEditUpdate(
-                          fieldName: 'date',
-                          text: text,
-                          trip: context.getArgument<DatabaseTrip>()!,
-                        ));
+                  readOnly: true,
+                  onTap: () async {
+                    DateTimeRange? tripDate = await showDateRangePicker(
+                        context: context,
+                        firstDate: DateTime.now(),
+                        lastDate:
+                            DateTime.now().add(const Duration(days: 730)));
+
+                    if (tripDate != null) {
+                      dateController.text =
+                          tripDate.toString().replaceAll('00:00:00.000', '');
+                    }
                   },
                 ),
                 TextFormField(

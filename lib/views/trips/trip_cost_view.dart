@@ -118,7 +118,8 @@ class _CostsListViewState extends State<CostsListView> {
                     child: IconButton(
                       onPressed: () async {
                         context.read<TripCostBloc>().add(TripCostRemoveAll(
-                            trip: context.getArgument<DatabaseTrip>()!));
+                            trip: context.getArgument<DatabaseTrip>()!,
+                            context: context));
                       },
                       icon: const Icon(Icons.delete_forever),
                     ),

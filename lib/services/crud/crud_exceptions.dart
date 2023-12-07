@@ -2,6 +2,8 @@ class DatabaseNotOpenException implements Exception {}
 
 class DatabaseNotFoundException implements Exception {}
 
-class UnableToGetDocumentsDirectory implements Exception {}
+class UnableToGetDocumentsDirectoryException implements Exception {}
 
-class InvalidDoubleException implements Exception {}
+class CouldNotUpdateDatabaseException implements Exception {}
+
+class CouldNotDeleteDatabaseException implements Exception {}

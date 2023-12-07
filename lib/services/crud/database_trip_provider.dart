@@ -61,13 +61,17 @@ class DatabaseTripsProvider {
         costs: [],
         requirements: []);
 
-    await db.insert(tripsTableName, {
-      idColumn: newTrip.id,
-      nameColumn: newTrip.name,
-      destinationColumn: newTrip.destination,
-      dateColumn: newTrip.date,
-      noteColumn: newTrip.note
-    });
+    await db.insert(
+      tripsTableName,
+      {
+        idColumn: newTrip.id,
+        nameColumn: newTrip.name,
+        destinationColumn: newTrip.destination,
+        dateColumn: newTrip.date,
+        noteColumn: newTrip.note
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
 
     _trips.add(newTrip);
     _tripsStreamController.add(_trips);
@@ -78,12 +82,16 @@ class DatabaseTripsProvider {
   Future<void> updateTrip(int id, String field, value) async {
     await _ensureDbIsOpen();
     final db = getDatabase();
-    await db.update(
+    int count = await db.update(
       tripsTableName,
       {field: value},
       where: 'id = ?',
       whereArgs: [id],
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    if (count == 0) {
+      throw CouldNotUpdateDatabaseException;
+    }
     final updatedTrip = _trips.singleWhere((element) => element.id == id);
     switch (field) {
       case 'name':
@@ -108,11 +116,14 @@ class DatabaseTripsProvider {
   Future<void> deleteTrip(DatabaseTrip trip) async {
     await _ensureDbIsOpen();
     final db = getDatabase();
-    await db.delete(
+    int count = await db.delete(
       tripsTableName,
       where: 'id = ?',
       whereArgs: [trip.id],
     );
+    if (count == 0) {
+      throw CouldNotDeleteDatabaseException;
+    }
     _trips.remove(trip);
     _tripsStreamController.add(_trips);
   }
@@ -136,13 +147,17 @@ class DatabaseTripsProvider {
         planned: double.nan,
         real: double.nan,
         tripID: tripId);
-    await db.insert(costsTableName, {
-      idColumn: newCost.id,
-      nameColumn: newCost.activity,
-      plannedColumn: newCost.planned,
-      realColumn: newCost.real,
-      tripIdColumn: newCost.tripID
-    });
+    await db.insert(
+      costsTableName,
+      {
+        idColumn: newCost.id,
+        nameColumn: newCost.activity,
+        plannedColumn: newCost.planned,
+        realColumn: newCost.real,
+        tripIdColumn: newCost.tripID
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
 
     _trips.singleWhere((element) => element.id == tripId).costs.add(newCost);
     return newCost;
@@ -151,12 +166,16 @@ class DatabaseTripsProvider {
   Future<void> updateCost(DatabaseCost cost, String field, value) async {
     await _ensureDbIsOpen();
     final db = getDatabase();
-    await db.update(
+    int count = await db.update(
       costsTableName,
       {field: value},
       where: 'id = ?',
       whereArgs: [cost.id],
     );
+
+    if (count == 0) {
+      throw CouldNotUpdateDatabaseException;
+    }
 
     final updatedCosts =
         _trips.singleWhere((trip) => trip.id == cost.tripID).costs;
@@ -182,11 +201,15 @@ class DatabaseTripsProvider {
   Future<void> deleteCost(DatabaseCost cost) async {
     await _ensureDbIsOpen();
     final db = getDatabase();
-    await db.delete(
+    int count = await db.delete(
       costsTableName,
       where: 'id = ?',
       whereArgs: [cost.id],
     );
+
+    if (count == 0) {
+      throw CouldNotDeleteDatabaseException;
+    }
     _trips
         .where((element) => element.id == cost.tripID)
         .first
@@ -203,12 +226,16 @@ class DatabaseTripsProvider {
       isDone: false,
       tripID: tripId,
     );
-    await db.insert(requirementsTableName, {
-      idColumn: newRequirement.id,
-      nameColumn: newRequirement.name,
-      isDoneColumn: (newRequirement.isDone) == false ? 0 : 1,
-      tripIdColumn: newRequirement.tripID
-    });
+    await db.insert(
+      requirementsTableName,
+      {
+        idColumn: newRequirement.id,
+        nameColumn: newRequirement.name,
+        isDoneColumn: (newRequirement.isDone) == false ? 0 : 1,
+        tripIdColumn: newRequirement.tripID
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
 
     _tripsStreamController.add(_trips);
     _trips
@@ -223,12 +250,16 @@ class DatabaseTripsProvider {
       DatabaseRequirement requirement, String field, value) async {
     await _ensureDbIsOpen();
     final db = getDatabase();
-    await db.update(
+    int count = await db.update(
       requirementsTableName,
       {field: value},
       where: 'id = ?',
       whereArgs: [requirement.id],
     );
+
+    if (count == 0) {
+      throw CouldNotUpdateDatabaseException;
+    }
 
     final updatedRequirements = _trips
         .singleWhere((trip) => trip.id == requirement.tripID)
@@ -251,11 +282,15 @@ class DatabaseTripsProvider {
   Future<void> deleteRequirement(DatabaseRequirement requirement) async {
     await _ensureDbIsOpen();
     final db = getDatabase();
-    await db.delete(
+    int count = await db.delete(
       requirementsTableName,
       where: 'id = ?',
       whereArgs: [requirement.id],
     );
+
+    if (count == 0) {
+      throw CouldNotDeleteDatabaseException;
+    }
     _trips
         .where((element) => element.id == requirement.tripID)
         .first
@@ -275,7 +310,7 @@ class DatabaseTripsProvider {
         await db.execute(createRequirementsTable);
         await db.execute(createTripsTable);
       } on MissingPlatformDirectoryException {
-        throw UnableToGetDocumentsDirectory();
+        throw UnableToGetDocumentsDirectoryException();
       }
     }
 
@@ -302,7 +337,7 @@ class DatabaseTripsProvider {
   Database getDatabase() {
     final db = _db;
     if (db == null) {
-      throw DatabaseNotFoundException;
+      throw DatabaseNotFoundException();
     }
     return db;
   }

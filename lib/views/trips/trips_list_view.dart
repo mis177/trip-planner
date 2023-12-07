@@ -5,6 +5,7 @@ import 'package:tripplanner/bloc/trip_list/trip_list_bloc.dart';
 import 'package:tripplanner/bloc/trip_list/trip_list_event.dart';
 import 'package:tripplanner/bloc/trip_list/trip_list_state.dart';
 import 'package:tripplanner/models/trips.dart';
+import 'package:tripplanner/utilities/dialogs/confirmation_dialog.dart';
 import 'package:tripplanner/utilities/loading_screen/loading_screen.dart';
 
 typedef TripCallback = void Function(DatabaseTrip trip);
@@ -112,9 +113,9 @@ class _TripsListViewState extends State<TripsListView> {
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
-                    onPressed: () {
+                    onPressed: () async {
                       context.read<TripListBloc>().add(
-                            TripListRemove(trip: trip),
+                            TripListRemove(trip: trip, context: context),
                           );
                     },
                   ),

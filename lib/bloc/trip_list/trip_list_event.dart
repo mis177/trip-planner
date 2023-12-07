@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:tripplanner/models/trips.dart';
 
 sealed class TripListEvent extends Equatable {
@@ -17,8 +18,10 @@ class TripListAdd extends TripListEvent {
 
 class TripListRemove extends TripListEvent {
   final DatabaseTrip trip;
+  final BuildContext context;
   const TripListRemove({
     required this.trip,
+    required this.context,
   });
 }
 

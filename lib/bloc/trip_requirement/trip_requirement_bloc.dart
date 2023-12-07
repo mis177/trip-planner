@@ -3,6 +3,7 @@ import 'package:tripplanner/bloc/trip_requirement/trip_requirement_event.dart';
 import 'package:tripplanner/bloc/trip_requirement/trip_requirement_state.dart';
 import 'package:tripplanner/bloc/trip_requirement/trip_requirements_utils.dart';
 import 'package:tripplanner/models/trips.dart';
+import 'package:tripplanner/utilities/dialogs/confirmation_dialog.dart';
 
 class TripRequirementBloc
     extends Bloc<TripRequirementEvent, TripRequirementState> {
@@ -74,18 +75,25 @@ class TripRequirementBloc
     });
 
     on<TripRequirementRemoveAll>((event, emit) async {
-      Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripRequirementDeleteAllInProgress(
-        isLoading: true,
-        loadingText: 'Deleting all requirements',
-      ));
-      await utils.deleteAllRequirement(event.trip);
-      if (stopwatch.elapsed.inMilliseconds < 250) {
-        await Future.delayed(
-            Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
+      final shouldDelete = await showConfirmationDialog(
+        context: event.context,
+        title: 'Requirements delete',
+        content: 'Are you sure that you want to delete all requirements?',
+      );
+      if (shouldDelete == true) {
+        Stopwatch stopwatch = Stopwatch()..start();
+        emit(const TripRequirementDeleteAllInProgress(
+          isLoading: true,
+          loadingText: 'Deleting all requirements',
+        ));
+        await utils.deleteAllRequirement(event.trip);
+        if (stopwatch.elapsed.inMilliseconds < 250) {
+          await Future.delayed(
+              Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
+        }
+        emit(const TripRequirementDeleteAllSuccess(isLoading: false));
+        emit(const TripRequirementLoadSuccess(dataRows: [], isLoading: false));
       }
-      emit(const TripRequirementDeleteAllSuccess(isLoading: false));
-      emit(const TripRequirementLoadSuccess(dataRows: [], isLoading: false));
     });
   }
 }
