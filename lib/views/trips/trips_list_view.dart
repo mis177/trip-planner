@@ -5,7 +5,6 @@ import 'package:tripplanner/bloc/trip_list/trip_list_bloc.dart';
 import 'package:tripplanner/bloc/trip_list/trip_list_event.dart';
 import 'package:tripplanner/bloc/trip_list/trip_list_state.dart';
 import 'package:tripplanner/models/trips.dart';
-import 'package:tripplanner/utilities/dialogs/confirmation_dialog.dart';
 import 'package:tripplanner/utilities/loading_screen/loading_screen.dart';
 
 typedef TripCallback = void Function(DatabaseTrip trip);

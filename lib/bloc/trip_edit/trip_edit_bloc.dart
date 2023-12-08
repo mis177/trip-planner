@@ -52,7 +52,6 @@ class TripEditBloc extends Bloc<TripEditEvent, TripEditState> {
     // on<TripEditTableSelectFailure> TODO
 
     on<TripEditSharePressed>((event, emit) async {
-      print('klik');
       await utils.shareTrip(trip: event.trip);
     });
   }
