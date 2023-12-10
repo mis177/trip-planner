@@ -59,8 +59,14 @@ class TripCostRemove extends TripCostEvent {
 class TripCostRemoveAll extends TripCostEvent {
   final DatabaseTrip trip;
   final BuildContext context;
+  final String dialogTitle;
+  final String dialogContent;
 
-  const TripCostRemoveAll({required this.trip, required this.context});
+  const TripCostRemoveAll(
+      {required this.trip,
+      required this.context,
+      required this.dialogTitle,
+      required this.dialogContent});
   @override
   List<Object?> get props => [trip.id];
 }

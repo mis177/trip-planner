@@ -4,14 +4,11 @@ import 'package:tripplanner/bloc/trip_edit/trip_edit_state.dart';
 import 'package:tripplanner/bloc/trip_edit/trip_edit_utils.dart';
 
 class TripEditBloc extends Bloc<TripEditEvent, TripEditState> {
-  TripEditBloc(TripEditUtils utils)
-      : super(const TripEditInitial(
-            isLoading: true, loadingText: 'Loading trip...')) {
+  TripEditBloc(TripEditUtils utils) : super(const TripEditInitial()) {
     on<TripLoad>(
       (event, emit) async {
         Stopwatch stopwatch = Stopwatch()..start();
-        emit(const TripEditLoadInProgress(
-            isLoading: true, loadingText: 'Loading trip...'));
+        emit(const TripEditLoadInProgress());
 
         if (stopwatch.elapsed.inMilliseconds < 250) {
           await Future.delayed(
@@ -52,7 +49,7 @@ class TripEditBloc extends Bloc<TripEditEvent, TripEditState> {
     // on<TripEditTableSelectFailure> TODO
 
     on<TripEditSharePressed>((event, emit) async {
-      await utils.shareTrip(trip: event.trip);
+      await utils.shareTrip(trip: event.trip, message: event.message);
     });
   }
 }

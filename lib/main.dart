@@ -5,6 +5,7 @@ import 'package:tripplanner/views/trips/trip_edit_view.dart';
 import 'package:tripplanner/views/trips/trip_cost_view.dart';
 import 'package:tripplanner/views/trips/trip_requirements_view.dart';
 import 'package:tripplanner/views/trips/trips_list_view.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,7 +19,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,

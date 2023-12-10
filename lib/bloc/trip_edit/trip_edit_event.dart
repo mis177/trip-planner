@@ -39,7 +39,8 @@ class TripEditTablePressed extends TripEditEvent {
 }
 
 class TripEditSharePressed extends TripEditEvent {
+  final List<String> message;
   final DatabaseTrip trip;
 
-  const TripEditSharePressed({required this.trip});
+  const TripEditSharePressed({required this.trip, required this.message});
 }

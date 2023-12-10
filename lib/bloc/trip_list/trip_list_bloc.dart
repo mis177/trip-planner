@@ -7,8 +7,7 @@ import 'package:tripplanner/models/trips.dart';
 import 'package:tripplanner/utilities/dialogs/confirmation_dialog.dart';
 
 class TripListBloc extends Bloc<TripListEvent, TripListState> {
-  TripListBloc(TripListUtils utils)
-      : super(const TripListInitial(isLoading: false)) {
+  TripListBloc(TripListUtils utils) : super(const TripListInitial()) {
     on<TripListLoadAll>((event, emit) async {
       Stopwatch stopwatch = Stopwatch()..start();
       emit(const TripListLoadInProgress());
@@ -25,8 +24,7 @@ class TripListBloc extends Bloc<TripListEvent, TripListState> {
 
     on<TripListAdd>((event, emit) async {
       Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripListAddInProgress(
-          isLoading: true, loadingText: 'Creating trip...'));
+      emit(const TripListAddInProgress());
       DatabaseTrip newTrip = await utils.addTrip();
 //simulating complex compution
       if (stopwatch.elapsed.inMilliseconds < 200) {
@@ -35,10 +33,9 @@ class TripListBloc extends Bloc<TripListEvent, TripListState> {
       }
 
       emit(TripListAddSuccess(
-          trip: newTrip,
-          route: tripEditRoute,
-          isLoading: true,
-          loadingText: 'Creating trip...'));
+        trip: newTrip,
+        route: tripEditRoute,
+      ));
       //simulating complex compution
       if (stopwatch.elapsed.inMilliseconds < 250) {
         await Future.delayed(
@@ -49,23 +46,24 @@ class TripListBloc extends Bloc<TripListEvent, TripListState> {
     on<TripListRemove>((event, emit) async {
       final shouldDelete = await showConfirmationDialog(
         context: event.context,
-        title: 'Trip delete',
-        content: 'Are you sure that you want to delete this trip?',
+        title: event.dialogTitle,
+        content: event.dialogContent,
       );
-      Stopwatch stopwatch = Stopwatch()..start();
-      if (shouldDelete == true) {
-        emit(const TripListRemoveInProgress(
-            isLoading: true, loadingText: 'Deleting trip...'));
-        await utils.deleteTrip(event.trip);
 
-        emit(const TripListRemoveSuccess());
-        emit(const TripListInitial(
-            isLoading: true, loadingText: 'Loading trips...'));
+      if (shouldDelete == true) {
+        Stopwatch stopwatch = Stopwatch()..start();
+        emit(const TripListRemoveInProgress());
+        await utils.deleteTrip(event.trip);
+        List<DatabaseTrip> tripsList = await utils.getAllTrips();
+
+        //  emit(const TripListInitial());
         //simulating complex compution
         if (stopwatch.elapsed.inMilliseconds < 250) {
           await Future.delayed(
               Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
         }
+        emit(const TripListRemoveSuccess());
+        emit(TripListLoadSuccess(allTrips: tripsList));
       }
     });
 

@@ -17,9 +17,15 @@ class TripListAdd extends TripListEvent {
 }
 
 class TripListRemove extends TripListEvent {
+  final List<DatabaseTrip> allTrips;
   final DatabaseTrip trip;
   final BuildContext context;
+  final String dialogTitle;
+  final String dialogContent;
   const TripListRemove({
+    required this.allTrips,
+    required this.dialogTitle,
+    required this.dialogContent,
     required this.trip,
     required this.context,
   });

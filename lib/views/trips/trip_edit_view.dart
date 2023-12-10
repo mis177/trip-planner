@@ -5,6 +5,7 @@ import 'package:tripplanner/bloc/trip_edit/trip_edit_event.dart';
 import 'package:tripplanner/bloc/trip_edit/trip_edit_state.dart';
 import 'package:tripplanner/bloc/trip_edit/trip_edit_utils.dart';
 import 'package:tripplanner/const/routes.dart';
+import 'package:tripplanner/extensions/buildcontext/loc.dart';
 import 'package:tripplanner/models/trips.dart';
 import 'package:tripplanner/utilities/get_argument.dart';
 import 'package:tripplanner/utilities/loading_screen/loading_screen.dart';
@@ -72,12 +73,25 @@ class _EditTripViewState extends State<EditTripView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your trip'),
+        title: Text(context.loc.trip_edit_title),
         actions: [
           IconButton(
             onPressed: () {
               context.read<TripEditBloc>().add(TripEditSharePressed(
-                  trip: context.getArgument<DatabaseTrip>()!));
+                    trip: context.getArgument<DatabaseTrip>()!,
+                    message: [
+                      context.loc.trip_edit_share_name,
+                      context.loc.trip_edit_share_planned_cost,
+                      context.loc.trip_edit_share_real_cost,
+                      context.loc.trip_edit_share_done,
+                      context.loc.trip_edit_share_title,
+                      context.loc.trip_edit_share_destination,
+                      context.loc.trip_edit_share_date,
+                      context.loc.trip_edit_share_note,
+                      context.loc.trip_edit_share_costs,
+                      context.loc.trip_edit_share_requirements,
+                    ],
+                  ));
             },
             icon: const Icon(Icons.share),
           ),
@@ -92,8 +106,9 @@ class _EditTripViewState extends State<EditTripView> {
             );
           }
 
-          if (state.isLoading) {
-            LoadingScreen().show(context: context, text: state.loadingText);
+          if (state is TripEditInitial || state is TripEditLoadInProgress) {
+            LoadingScreen()
+                .show(context: context, text: context.loc.trip_edit_loading);
           } else {
             LoadingScreen().hide();
           }
@@ -111,9 +126,9 @@ class _EditTripViewState extends State<EditTripView> {
                   initialValue: state.trip?.name,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  decoration: const InputDecoration(
-                    hintText: 'Name of a trip',
-                    helperText: 'Name of your trip',
+                  decoration: InputDecoration(
+                    hintText: context.loc.trip_edit_name_hint,
+                    helperText: context.loc.trip_edit_name_helper,
                   ),
                   onChanged: (text) {
                     context.read<TripEditBloc>().add(TripEditUpdate(
@@ -127,9 +142,9 @@ class _EditTripViewState extends State<EditTripView> {
                   initialValue: state.trip?.destination,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  decoration: const InputDecoration(
-                    hintText: 'Trip destination',
-                    helperText: 'Destination of your trip',
+                  decoration: InputDecoration(
+                    hintText: context.loc.trip_edit_destination_hint,
+                    helperText: context.loc.trip_edit_destination_helper,
                   ),
                   onChanged: (text) {
                     context.read<TripEditBloc>().add(TripEditUpdate(
@@ -144,9 +159,9 @@ class _EditTripViewState extends State<EditTripView> {
                   controller: dateController,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  decoration: const InputDecoration(
-                    hintText: 'Trip date',
-                    helperText: 'Date of your trip',
+                  decoration: InputDecoration(
+                    hintText: context.loc.trip_edit_date_hint,
+                    helperText: context.loc.trip_edit_date_helper,
                   ),
                   readOnly: true,
                   onTap: () async {
@@ -166,9 +181,9 @@ class _EditTripViewState extends State<EditTripView> {
                   initialValue: state.trip?.note,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  decoration: const InputDecoration(
-                    hintText: 'My notes',
-                    helperText: 'Your notes',
+                  decoration: InputDecoration(
+                    hintText: context.loc.trip_edit_notes_hint,
+                    helperText: context.loc.trip_edit_notes_helper,
                   ),
                   onChanged: (text) {
                     context.read<TripEditBloc>().add(TripEditUpdate(
@@ -179,9 +194,9 @@ class _EditTripViewState extends State<EditTripView> {
                   },
                 ),
                 TextField(
-                  decoration: const InputDecoration(
-                    hintText: 'Trip costs [.....]',
-                    helperText: 'Cost of your trip',
+                  decoration: InputDecoration(
+                    hintText: context.loc.trip_edit_costs_hint,
+                    helperText: context.loc.trip_edit_costs_helper,
                   ),
                   readOnly: true,
                   onTap: () {
@@ -192,9 +207,9 @@ class _EditTripViewState extends State<EditTripView> {
                   },
                 ),
                 TextField(
-                  decoration: const InputDecoration(
-                    hintText: 'Trip requirements [.....]',
-                    helperText: 'Requirements before your trip',
+                  decoration: InputDecoration(
+                    hintText: context.loc.trip_edit_requirements_hint,
+                    helperText: context.loc.trip_edit_requirements_helper,
                   ),
                   readOnly: true,
                   onTap: () {
@@ -209,7 +224,7 @@ class _EditTripViewState extends State<EditTripView> {
               ],
             );
           }
-          return const Text('Error');
+          return const CircularProgressIndicator();
         },
       ),
     );

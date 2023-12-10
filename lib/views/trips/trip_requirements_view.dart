@@ -4,6 +4,7 @@ import 'package:tripplanner/bloc/trip_requirement/trip_requirement_bloc.dart';
 import 'package:tripplanner/bloc/trip_requirement/trip_requirement_event.dart';
 import 'package:tripplanner/bloc/trip_requirement/trip_requirement_state.dart';
 import 'package:tripplanner/bloc/trip_requirement/trip_requirements_utils.dart';
+import 'package:tripplanner/extensions/buildcontext/loc.dart';
 import 'package:tripplanner/models/trips.dart';
 import 'package:tripplanner/utilities/get_argument.dart';
 import 'package:tripplanner/utilities/loading_screen/loading_screen.dart';
@@ -50,19 +51,30 @@ class _RequirementsListViewState extends State<RequirementsListView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Requirements')),
+      appBar: AppBar(title: Text(context.loc.trip_requirements_title)),
       body: BlocConsumer<TripRequirementBloc, TripRequirementState>(
           listener: (context, state) {
         if (state is TripRequirementAddSuccess) {
-          showSnackBar('Requirement added');
+          showSnackBar(context.loc.trip_requirements_added);
         } else if (state is TripRequirementDeleteSuccess) {
-          showSnackBar('Requirement deleted');
+          showSnackBar(context.loc.trip_requirements_deleted);
         } else if (state is TripRequirementDeleteAllSuccess) {
-          showSnackBar('All requirements deleted');
+          showSnackBar(context.loc.trip_requirements_deleted_all);
         }
 
-        if (state.isLoading) {
-          LoadingScreen().show(context: context, text: state.loadingText);
+        if (state is TripRequirementLoadInProgress) {
+          LoadingScreen().show(
+              context: context, text: context.loc.trip_requirements_loading);
+        } else if (state is TripRequirementAdd) {
+          LoadingScreen().show(
+              context: context, text: context.loc.trip_requirements_adding);
+        } else if (state is TripRequirementRemove) {
+          LoadingScreen().show(
+              context: context, text: context.loc.trip_requirements_deleting);
+        } else if (state is TripRequirementDeleteAllInProgress) {
+          LoadingScreen().show(
+              context: context,
+              text: context.loc.trip_requirements_deleting_all);
         } else {
           LoadingScreen().hide();
         }
@@ -80,10 +92,10 @@ class _RequirementsListViewState extends State<RequirementsListView> {
                 DataColumn(
                   label: SizedBox(
                     width: width * 0.5,
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        'Requirement',
-                        style: TextStyle(fontStyle: FontStyle.italic),
+                        context.loc.trip_requirements_requirement,
+                        style: const TextStyle(fontStyle: FontStyle.italic),
                       ),
                     ),
                   ),
@@ -91,10 +103,10 @@ class _RequirementsListViewState extends State<RequirementsListView> {
                 DataColumn(
                   label: SizedBox(
                     width: width * 0.2,
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        'Done',
-                        style: TextStyle(fontStyle: FontStyle.italic),
+                        context.loc.trip_requirements_done,
+                        style: const TextStyle(fontStyle: FontStyle.italic),
                       ),
                     ),
                   ),
@@ -107,7 +119,11 @@ class _RequirementsListViewState extends State<RequirementsListView> {
                         context.read<TripRequirementBloc>().add(
                             TripRequirementRemoveAll(
                                 trip: context.getArgument<DatabaseTrip>()!,
-                                context: context));
+                                context: context,
+                                dialogTitle:
+                                    context.loc.trip_requirements_dialog_title,
+                                dialogContent: context
+                                    .loc.trip_requirements_dialog_content));
                       },
                       icon: const Icon(Icons.delete_forever),
                     ),
@@ -126,9 +142,10 @@ class _RequirementsListViewState extends State<RequirementsListView> {
                             child: TextFormField(
                               initialValue: requirement.name,
                               textAlign: TextAlign.center,
-                              decoration: const InputDecoration(
-                                hintText: 'requirement',
-                                border: UnderlineInputBorder(),
+                              decoration: InputDecoration(
+                                hintText: context
+                                    .loc.trip_requirements_requirement_hint,
+                                border: const UnderlineInputBorder(),
                               ),
                               keyboardType: TextInputType.multiline,
                               maxLines: null,

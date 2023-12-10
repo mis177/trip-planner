@@ -8,13 +8,10 @@ import 'package:tripplanner/utilities/dialogs/confirmation_dialog.dart';
 class TripRequirementBloc
     extends Bloc<TripRequirementEvent, TripRequirementState> {
   TripRequirementBloc(TripRequirementUtils utils)
-      : super(const TripRequirementInitial(isLoading: false)) {
+      : super(const TripRequirementInitial()) {
     on<TripRequirementLoadAll>((event, emit) async {
       Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripRequirementLoadInProgress(
-        isLoading: true,
-        loadingText: 'Loading requirements...',
-      ));
+      emit(const TripRequirementLoadInProgress());
       if (stopwatch.elapsed.inMilliseconds < 250) {
         await Future.delayed(
             Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
@@ -22,27 +19,28 @@ class TripRequirementBloc
       List<DatabaseRequirement> dataRows =
           utils.loadExistingRequirement(event.trip);
 
-      emit(TripRequirementLoadSuccess(dataRows: dataRows, isLoading: false));
+      emit(TripRequirementLoadSuccess(
+        dataRows: dataRows,
+      ));
     });
 
     on<TripRequirementAdd>((event, emit) async {
       Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripRequirementAddInProgress(
-        isLoading: true,
-        loadingText: 'Adding new requirement',
-      ));
+      emit(const TripRequirementAddInProgress());
 
       await utils.addRequirement(event.trip);
       if (stopwatch.elapsed.inMilliseconds < 250) {
         await Future.delayed(
             Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
       }
-      emit(const TripRequirementAddSuccess(isLoading: false));
+      emit(const TripRequirementAddSuccess());
 
       List<DatabaseRequirement> dataRows =
           utils.loadExistingRequirement(event.trip);
 
-      emit(TripRequirementLoadSuccess(dataRows: dataRows, isLoading: false));
+      emit(TripRequirementLoadSuccess(
+        dataRows: dataRows,
+      ));
     });
 
     on<TripRequirementUpdate>((event, emit) async {
@@ -57,42 +55,40 @@ class TripRequirementBloc
 
     on<TripRequirementRemove>((event, emit) async {
       Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripRequirementDeleteInProgress(
-        isLoading: true,
-        loadingText: 'Deleting requirement',
-      ));
+      emit(const TripRequirementDeleteInProgress());
       await utils.deleteRequirement(event.requirement);
       if (stopwatch.elapsed.inMilliseconds < 250) {
         await Future.delayed(
             Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
       }
-      emit(const TripRequirementDeleteSuccess(isLoading: false));
+      emit(const TripRequirementDeleteSuccess());
 
       List<DatabaseRequirement> dataRows =
           utils.loadExistingRequirement(event.trip);
 
-      emit(TripRequirementLoadSuccess(dataRows: dataRows, isLoading: false));
+      emit(TripRequirementLoadSuccess(
+        dataRows: dataRows,
+      ));
     });
 
     on<TripRequirementRemoveAll>((event, emit) async {
       final shouldDelete = await showConfirmationDialog(
         context: event.context,
-        title: 'Requirements delete',
-        content: 'Are you sure that you want to delete all requirements?',
+        title: event.dialogTitle,
+        content: event.dialogContent,
       );
       if (shouldDelete == true) {
         Stopwatch stopwatch = Stopwatch()..start();
-        emit(const TripRequirementDeleteAllInProgress(
-          isLoading: true,
-          loadingText: 'Deleting all requirements',
-        ));
+        emit(const TripRequirementDeleteAllInProgress());
         await utils.deleteAllRequirement(event.trip);
         if (stopwatch.elapsed.inMilliseconds < 250) {
           await Future.delayed(
               Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
         }
-        emit(const TripRequirementDeleteAllSuccess(isLoading: false));
-        emit(const TripRequirementLoadSuccess(dataRows: [], isLoading: false));
+        emit(const TripRequirementDeleteAllSuccess());
+        emit(const TripRequirementLoadSuccess(
+          dataRows: [],
+        ));
       }
     });
   }

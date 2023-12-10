@@ -6,44 +6,37 @@ import 'package:tripplanner/bloc/trip_cost/trip_costs_utils.dart';
 import 'package:tripplanner/utilities/dialogs/confirmation_dialog.dart';
 
 class TripCostBloc extends Bloc<TripCostEvent, TripCostState> {
-  TripCostBloc(TripCostUtils utils)
-      : super(const TripCostInitial(isLoading: false)) {
+  TripCostBloc(TripCostUtils utils) : super(const TripCostInitial()) {
     on<TripCostLoadAll>((event, emit) async {
       Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripCostLoadInProgress(
-        isLoading: true,
-        loadingText: 'Loading costs...',
-      ));
+      emit(const TripCostLoadInProgress());
       if (stopwatch.elapsed.inMilliseconds < 250) {
         await Future.delayed(
             Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
       }
       List<DatabaseCost> dataRows = utils.loadExistingCost(event.trip);
 
-      emit(TripCostLoadSuccess(dataRows: dataRows, isLoading: false));
+      emit(TripCostLoadSuccess(dataRows: dataRows));
     });
 
     on<TripCostAdd>((event, emit) async {
       Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripCostAddInProgress(
-        isLoading: true,
-        loadingText: 'Adding new cost',
-      ));
+      emit(const TripCostAddInProgress());
 
       await utils.addCost(event.trip);
       if (stopwatch.elapsed.inMilliseconds < 250) {
         await Future.delayed(
             Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
       }
-      emit(const TripCostAddSuccess(isLoading: false));
+      emit(const TripCostAddSuccess());
 
       List<DatabaseCost> dataRows = utils.loadExistingCost(event.trip);
 
-      emit(TripCostLoadSuccess(dataRows: dataRows, isLoading: false));
+      emit(TripCostLoadSuccess(dataRows: dataRows));
     });
 
     on<TripCostUpdate>((event, emit) async {
-      //emit(TripCostUpdateInProgress(isLoading: true));
+      //emit(TripCostUpdateInProgress());
       await utils.updateCost(
         fieldName: event.fieldName,
         text: event.text,
@@ -54,42 +47,36 @@ class TripCostBloc extends Bloc<TripCostEvent, TripCostState> {
 
     on<TripCostRemove>((event, emit) async {
       Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripCostDeleteInProgress(
-        isLoading: true,
-        loadingText: 'Deleting cost',
-      ));
+      emit(const TripCostDeleteInProgress());
       await utils.deleteCost(event.cost);
       if (stopwatch.elapsed.inMilliseconds < 250) {
         await Future.delayed(
             Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
       }
-      emit(const TripCostDeleteSuccess(isLoading: false));
+      emit(const TripCostDeleteSuccess());
 
       List<DatabaseCost> dataRows = utils.loadExistingCost(event.trip);
 
-      emit(TripCostLoadSuccess(dataRows: dataRows, isLoading: false));
+      emit(TripCostLoadSuccess(dataRows: dataRows));
     });
 
     on<TripCostRemoveAll>((event, emit) async {
       final shouldDelete = await showConfirmationDialog(
         context: event.context,
-        title: 'Costs delete',
-        content: 'Are you sure that you want to delete all costs?',
+        title: event.dialogTitle,
+        content: event.dialogContent,
       );
       if (shouldDelete == true) {
         Stopwatch stopwatch = Stopwatch()..start();
-        emit(const TripCostDeleteAllInProgress(
-          isLoading: true,
-          loadingText: 'Deleting all costs',
-        ));
+        emit(const TripCostDeleteAllInProgress());
         await utils.deleteAllCost(event.trip);
         if (stopwatch.elapsed.inMilliseconds < 250) {
           await Future.delayed(
               Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
         }
-        emit(const TripCostDeleteAllSuccess(isLoading: false));
+        emit(const TripCostDeleteAllSuccess());
         List<DatabaseCost> dataRows = utils.loadExistingCost(event.trip);
-        emit(TripCostLoadSuccess(dataRows: dataRows, isLoading: false));
+        emit(TripCostLoadSuccess(dataRows: dataRows));
       }
     });
   }

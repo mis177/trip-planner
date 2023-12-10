@@ -2,78 +2,73 @@ import 'package:equatable/equatable.dart';
 import 'package:tripplanner/models/trips.dart';
 
 sealed class TripRequirementState extends Equatable {
-  final bool isLoading;
-  final String loadingText;
-  const TripRequirementState(
-      {this.loadingText = 'Please wait a moment', this.isLoading = false});
+  const TripRequirementState();
   @override
   List<Object?> get props => [];
 }
 
 class TripRequirementInitial extends TripRequirementState {
-  const TripRequirementInitial({super.loadingText, super.isLoading});
+  const TripRequirementInitial();
 }
 
 class TripRequirementLoadInProgress extends TripRequirementState {
-  const TripRequirementLoadInProgress({super.loadingText, super.isLoading});
+  const TripRequirementLoadInProgress();
 }
 
 class TripRequirementLoadSuccess extends TripRequirementState {
   final List<DatabaseRequirement> dataRows;
 
-  const TripRequirementLoadSuccess(
-      {required this.dataRows, super.isLoading, super.loadingText});
+  const TripRequirementLoadSuccess({required this.dataRows});
 }
 
 class TripRequirementLoadFailure extends TripRequirementState {
-  const TripRequirementLoadFailure({super.loadingText, super.isLoading});
+  const TripRequirementLoadFailure();
 }
 
 class TripRequirementAddInProgress extends TripRequirementState {
-  const TripRequirementAddInProgress({super.loadingText, super.isLoading});
+  const TripRequirementAddInProgress();
 }
 
 class TripRequirementAddSuccess extends TripRequirementState {
-  const TripRequirementAddSuccess({super.loadingText, super.isLoading});
+  const TripRequirementAddSuccess();
 }
 
 class TripRequirementAddFailure extends TripRequirementState {
-  const TripRequirementAddFailure({super.loadingText, super.isLoading});
+  const TripRequirementAddFailure();
 }
 
 class TripRequirementUpdateInProgress extends TripRequirementState {
-  const TripRequirementUpdateInProgress({super.loadingText, super.isLoading});
+  const TripRequirementUpdateInProgress();
 }
 
 class TripRequirementUpdateSuccess extends TripRequirementState {
-  const TripRequirementUpdateSuccess({super.loadingText, super.isLoading});
+  const TripRequirementUpdateSuccess();
 }
 
 class TripRequirementUpdateFailure extends TripRequirementState {
-  const TripRequirementUpdateFailure({super.loadingText, super.isLoading});
+  const TripRequirementUpdateFailure();
 }
 
 class TripRequirementDeleteInProgress extends TripRequirementState {
-  const TripRequirementDeleteInProgress({super.loadingText, super.isLoading});
+  const TripRequirementDeleteInProgress();
 }
 
 class TripRequirementDeleteSuccess extends TripRequirementState {
-  const TripRequirementDeleteSuccess({super.loadingText, super.isLoading});
+  const TripRequirementDeleteSuccess();
 }
 
 class TripRequirementDeleteFailure extends TripRequirementState {
-  const TripRequirementDeleteFailure({super.loadingText, super.isLoading});
+  const TripRequirementDeleteFailure();
 }
 
 class TripRequirementDeleteAllInProgress extends TripRequirementState {
-  const TripRequirementDeleteAllInProgress(
-      {super.loadingText, super.isLoading});
+  const TripRequirementDeleteAllInProgress();
 }
 
 class TripRequirementDeleteAllSuccess extends TripRequirementState {
-  const TripRequirementDeleteAllSuccess({super.loadingText, super.isLoading});
+  const TripRequirementDeleteAllSuccess();
 }
 
 class TripRequirementDeleteAllFailure extends TripRequirementState {
-  const TripRequirementDeleteAllFailure({super.loadingText, super.isLoading});
+  const TripRequirementDeleteAllFailure();
 }

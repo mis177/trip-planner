@@ -7,6 +7,7 @@ import 'package:tripplanner/models/trips.dart';
 import 'package:tripplanner/utilities/get_argument.dart';
 import 'package:tripplanner/utilities/loading_screen/loading_screen.dart';
 import 'package:tripplanner/bloc/trip_cost/trip_costs_utils.dart';
+import 'package:tripplanner/extensions/buildcontext/loc.dart';
 
 class CostsView extends StatefulWidget {
   const CostsView({super.key});
@@ -49,23 +50,37 @@ class _CostsListViewState extends State<CostsListView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Trip costs'),
+        title: Text(context.loc.trip_costs_title),
       ),
       body:
           BlocConsumer<TripCostBloc, TripCostState>(listener: (context, state) {
         if (state is TripCostAddSuccess) {
-          showSnackBar('Cost added');
+          showSnackBar(context.loc.trip_costs_added);
         } else if (state is TripCostDeleteSuccess) {
-          showSnackBar('Cost deleted');
+          showSnackBar(context.loc.trip_costs_deleted);
         } else if (state is TripCostDeleteAllSuccess) {
-          showSnackBar('All costs deleted');
-        }
-
-        if (state.isLoading) {
-          LoadingScreen().show(context: context, text: state.loadingText);
+          showSnackBar(context.loc.trip_costs_deleted_all);
+        } else if (state is TripCostLoadInProgress) {
+          LoadingScreen()
+              .show(context: context, text: context.loc.trip_costs_loading);
+        } else if (state is TripCostAddInProgress) {
+          LoadingScreen()
+              .show(context: context, text: context.loc.trip_costs_adding);
+        } else if (state is TripCostDeleteInProgress) {
+          LoadingScreen()
+              .show(context: context, text: context.loc.trip_costs_deleting);
+        } else if (state is TripCostDeleteAllInProgress) {
+          LoadingScreen().show(
+              context: context, text: context.loc.trip_costs_deleting_all);
         } else {
           LoadingScreen().hide();
         }
+
+        // if (state.isLoading) {
+        //   LoadingScreen().show(context: context, text: state.loadingText);
+        // } else {
+        //   LoadingScreen().hide();
+        // }
       }, builder: (context, state) {
         if (state is TripCostInitial) {
           context
@@ -81,10 +96,10 @@ class _CostsListViewState extends State<CostsListView> {
                 DataColumn(
                   label: SizedBox(
                     width: width * 0.3,
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        'Activity',
-                        style: TextStyle(fontStyle: FontStyle.italic),
+                        context.loc.trip_costs_activity,
+                        style: const TextStyle(fontStyle: FontStyle.italic),
                       ),
                     ),
                   ),
@@ -92,10 +107,10 @@ class _CostsListViewState extends State<CostsListView> {
                 DataColumn(
                   label: SizedBox(
                     width: width * 0.15,
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        'Planned',
-                        style: TextStyle(fontStyle: FontStyle.italic),
+                        context.loc.trip_costs_planned,
+                        style: const TextStyle(fontStyle: FontStyle.italic),
                       ),
                     ),
                   ),
@@ -104,10 +119,10 @@ class _CostsListViewState extends State<CostsListView> {
                 DataColumn(
                   label: SizedBox(
                     width: width * 0.15,
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        'Real',
-                        style: TextStyle(fontStyle: FontStyle.italic),
+                        context.loc.trip_costs_real,
+                        style: const TextStyle(fontStyle: FontStyle.italic),
                       ),
                     ),
                   ),
@@ -118,8 +133,12 @@ class _CostsListViewState extends State<CostsListView> {
                     child: IconButton(
                       onPressed: () async {
                         context.read<TripCostBloc>().add(TripCostRemoveAll(
-                            trip: context.getArgument<DatabaseTrip>()!,
-                            context: context));
+                              trip: context.getArgument<DatabaseTrip>()!,
+                              context: context,
+                              dialogTitle: context.loc.trip_costs_delete,
+                              dialogContent:
+                                  context.loc.trip_costs_delete_content,
+                            ));
                       },
                       icon: const Icon(Icons.delete_forever),
                     ),
@@ -138,15 +157,15 @@ class _CostsListViewState extends State<CostsListView> {
                           width: width * 0.3,
                           child: TextFormField(
                             initialValue: cost.activity,
-                            decoration: const InputDecoration(
-                              hintText: 'Activity name',
+                            decoration: InputDecoration(
+                              hintText: context.loc.trip_costs_activity_hint,
                             ),
                             keyboardType: TextInputType.multiline,
                             maxLines: null,
                             textInputAction: TextInputAction.next,
                             onChanged: (text) {
                               context.read<TripCostBloc>().add(TripCostUpdate(
-                                    fieldName: 'name',
+                                    fieldName: "name",
                                     text: text,
                                     cost: cost,
                                     trip: context.getArgument<DatabaseTrip>()!,
@@ -173,7 +192,7 @@ class _CostsListViewState extends State<CostsListView> {
                                 plannedCost =
                                     double.tryParse(text) ?? double.nan;
                                 context.read<TripCostBloc>().add(TripCostUpdate(
-                                      fieldName: 'planned',
+                                      fieldName: "planned",
                                       text: text,
                                       cost: cost,
                                       trip:
@@ -193,7 +212,7 @@ class _CostsListViewState extends State<CostsListView> {
                             onChanged: (text) {
                               realCost = double.tryParse(text) ?? double.nan;
                               context.read<TripCostBloc>().add(TripCostUpdate(
-                                    fieldName: 'real',
+                                    fieldName: "real",
                                     text: text,
                                     cost: cost,
                                     trip: context.getArgument<DatabaseTrip>()!,

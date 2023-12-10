@@ -26,22 +26,23 @@ class TripEditUtils {
 
   Future<void> shareTrip({
     required DatabaseTrip trip,
+    required List<String> message,
   }) async {
     var sharedTrip = provider.getTrip(trip.id);
     String tripCosts = '';
     for (var cost in sharedTrip.costs) {
       tripCosts +=
-          '[ Name: ${cost.activity}, Planned cost: ${cost.planned}, Real cost: ${cost.real} ]\n';
+          '[ ${message[0]}: ${cost.activity}, ${message[1]}: ${cost.planned}, ${message[2]}: ${cost.real} ]\n';
     }
 
     String tripRequirements = '';
     for (var requirement in sharedTrip.requirements) {
       tripRequirements +=
-          '[ Name: ${requirement.name}, Done: ${requirement.isDone} ]\n';
+          '[ ${message[0]}: ${requirement.name}, ${message[3]}: ${requirement.isDone} ]\n';
     }
 
     String sharingText =
-        ' Sharing trip from TripPlanner App \n Name: ${sharedTrip.name} \n Destination: ${sharedTrip.destination} \n Date: ${sharedTrip.date} \n Note: ${sharedTrip.note} \n Costs: $tripCosts Requirements: $tripRequirements';
+        ' ${message[4]} \n ${message[0]}: ${sharedTrip.name} \n ${message[5]}: ${sharedTrip.destination} \n ${message[6]}: ${sharedTrip.date} \n ${message[7]}: ${sharedTrip.note} \n ${message[8]}: $tripCosts ${message[9]}: $tripRequirements';
     Share.share(sharingText);
   }
 }

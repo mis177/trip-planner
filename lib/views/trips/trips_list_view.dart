@@ -4,6 +4,7 @@ import 'package:tripplanner/bloc/trip_list/trip_list_utils.dart';
 import 'package:tripplanner/bloc/trip_list/trip_list_bloc.dart';
 import 'package:tripplanner/bloc/trip_list/trip_list_event.dart';
 import 'package:tripplanner/bloc/trip_list/trip_list_state.dart';
+import 'package:tripplanner/extensions/buildcontext/loc.dart';
 import 'package:tripplanner/models/trips.dart';
 import 'package:tripplanner/utilities/loading_screen/loading_screen.dart';
 
@@ -50,7 +51,7 @@ class _TripsListViewState extends State<TripsListView> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Your Trips"),
+          title: Text(context.loc.trips_list_title),
           actions: [
             IconButton(
               onPressed: () async {
@@ -83,11 +84,17 @@ class _TripsListViewState extends State<TripsListView> {
                         const TripListLoadAll(),
                       ));
             } else if (state is TripListRemoveSuccess) {
-              showSnackBar('Trip removed');
+              showSnackBar(context.loc.trips_list_removed);
             }
-
-            if (state.isLoading) {
-              LoadingScreen().show(context: context, text: state.loadingText);
+            if (state is TripListAddInProgress) {
+              LoadingScreen().show(
+                  context: context, text: context.loc.trips_list_creating);
+            } else if (state is TripListRemoveInProgress) {
+              LoadingScreen().show(
+                  context: context, text: context.loc.trips_list_deleting);
+            } else if (state is TripListRemoveInProgress) {
+              LoadingScreen()
+                  .show(context: context, text: context.loc.trips_list_loading);
             } else {
               LoadingScreen().hide();
             }
@@ -114,7 +121,14 @@ class _TripsListViewState extends State<TripsListView> {
                     icon: const Icon(Icons.delete),
                     onPressed: () async {
                       context.read<TripListBloc>().add(
-                            TripListRemove(trip: trip, context: context),
+                            TripListRemove(
+                              trip: trip,
+                              context: context,
+                              dialogTitle: context.loc.trips_list_dialog_title,
+                              dialogContent:
+                                  context.loc.trips_list_dialog_content,
+                              allTrips: state.allTrips,
+                            ),
                           );
                     },
                   ),
