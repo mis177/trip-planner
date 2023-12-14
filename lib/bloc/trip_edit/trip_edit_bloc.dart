@@ -1,54 +1,45 @@
 import 'package:bloc/bloc.dart';
 import 'package:tripplanner/bloc/trip_edit/trip_edit_event.dart';
 import 'package:tripplanner/bloc/trip_edit/trip_edit_state.dart';
-import 'package:tripplanner/bloc/trip_edit/trip_edit_utils.dart';
+import 'package:tripplanner/bloc/trip_edit/trip_edit_service.dart';
 
 class TripEditBloc extends Bloc<TripEditEvent, TripEditState> {
-  TripEditBloc(TripEditUtils utils) : super(const TripEditInitial()) {
+  TripEditBloc(TripEditService utils)
+      : super(const TripEditInitial(exception: null)) {
     on<TripLoad>(
       (event, emit) async {
-        Stopwatch stopwatch = Stopwatch()..start();
-        emit(const TripEditLoadInProgress());
+        emit(const TripEditLoadInProgress(exception: null));
 
-        if (stopwatch.elapsed.inMilliseconds < 250) {
-          await Future.delayed(
-              Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
-        }
-        emit(TripEditLoadSuccess(trip: event.trip));
-        //   emit(TripEditLoadFailure()); TODO
+        emit(TripEditLoaded(trip: event.trip, exception: null));
       },
     );
 
     on<TripEditUpdate>(
       (event, emit) async {
-        // emit(
-        //   const TripEditUpdateInProgress(
-        //       isLoading: true, loadingText: 'Updating trip...'),
-        // );
-
-        utils.updateTrip(
-          fieldName: event.fieldName,
-          text: event.text,
-          trip: event.trip,
-        );
-
-        //emit(const TripEditUpdateSuccess()); TODO
-
-        // emit(const TripEditUpdateFailure());  TODO
+        Exception? exception;
+        try {
+          utils.updateTrip(
+            fieldName: event.fieldName,
+            text: event.text,
+            trip: event.trip,
+          );
+        } on Exception catch (e) {
+          exception = e;
+          emit(TripEditUpdated(exception: exception));
+        }
       },
     );
 
-    on<TripEditTablePressed>((event, emit) {
-      emit(TripEditTableSelect(
+    on<TripEditTablePress>((event, emit) {
+      emit(TripEditTableSelected(
         route: event.route,
         trip: event.trip,
+        exception: null,
       ));
-      emit(TripEditLoadSuccess(trip: event.trip));
+      emit(TripEditLoaded(trip: event.trip, exception: null));
     });
 
-    // on<TripEditTableSelectFailure> TODO
-
-    on<TripEditSharePressed>((event, emit) async {
+    on<TripEditSharePress>((event, emit) async {
       await utils.shareTrip(trip: event.trip, message: event.message);
     });
   }

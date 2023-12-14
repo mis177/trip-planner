@@ -31,16 +31,16 @@ class TripEditUpdate extends TripEditEvent {
   List<Object?> get props => [fieldName, text, trip.id];
 }
 
-class TripEditTablePressed extends TripEditEvent {
+class TripEditTablePress extends TripEditEvent {
   final String route;
   final DatabaseTrip trip;
 
-  const TripEditTablePressed({required this.route, required this.trip});
+  const TripEditTablePress({required this.route, required this.trip});
 }
 
-class TripEditSharePressed extends TripEditEvent {
+class TripEditSharePress extends TripEditEvent {
   final List<String> message;
   final DatabaseTrip trip;
 
-  const TripEditSharePressed({required this.trip, required this.message});
+  const TripEditSharePress({required this.trip, required this.message});
 }

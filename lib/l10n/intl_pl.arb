@@ -1,4 +1,8 @@
 {
+
+    "trip_lang_pl" : "polski",
+    "trip_lang_en" : "angielski",
+
     "trip_costs_title" : "Koszta wycieczki",
     "trip_costs_added" : "Dodano koszt",
     "trip_costs_deleted" : "Usunięto koszt",
@@ -13,6 +17,10 @@
     "trip_costs_delete" : "Usuwanie kosztu",
     "trip_costs_delete_content" : "Czy na pewno chcesz usunąć wszystkie koszty?",
     "trip_costs_activity_hint" : "Nazwa aktywności",
+    "trip_costs_error_add" : "Problem podczas dodawania nowego kosztu",
+    "trip_costs_error_remove" : "Problem podczas usuwania kosztu",
+    "trip_costs_error_remove_all" : "Problem podczas usuwania kosztów",
+    "trip_costs_error_update" : "Problem podczas zmiany kosztu",
 
 
     "trip_edit_share_name" : "Nazwa",
@@ -55,14 +63,20 @@
     "trip_requirements_dialog_title" : "Usuwanie wymagania" ,
     "trip_requirements_dialog_content" : "Czy na pewno chcesz usunąć wszystkie wymagania?" ,
     "trip_requirements_requirement_hint" : "wymaganie",
+     "trip_requirements_error_add" : "Problem podczas dodawania wymagania",
+    "trip_requirements_error_remove" : "Problem podczas usuwania wymagania",
+    "trip_requirements_error_remove_all" : "Problem podczas usuwania wszystkich wymagań",
 
     "trips_list_title" : "Twoje podróże",
     "trips_list_removed" : "Usunięto podróż",
     "trips_list_creating" : "Tworzenie podróży...",
     "trips_list_deleting" : "Usuwanie podróży...",
     "trips_list_loading" : "Ładowanie podróży...",
-    "trips_list_dialog_title" : "Usunięto podróż",
-    "trips_list_dialog_content" : "Czy na pewno chcesz usunąć tę podróż?"
+    "trips_list_dialog_title" : "Usunięcie podróży",
+    "trips_list_dialog_content" : "Czy na pewno chcesz usunąć tę podróż?",
+    "trip_list_error_load_trips" : "Problem podczas ładowania podróży",
+    "trip_list_error_load_list" : "Problem podczas ładowania listy",
+    "trip_list_error_remove" : "Problem podczas usuwania podróży"
 
 
 

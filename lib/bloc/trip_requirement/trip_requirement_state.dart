@@ -2,73 +2,55 @@ import 'package:equatable/equatable.dart';
 import 'package:tripplanner/models/trips.dart';
 
 sealed class TripRequirementState extends Equatable {
-  const TripRequirementState();
+  final Exception? exception;
+  const TripRequirementState({required this.exception});
   @override
   List<Object?> get props => [];
 }
 
 class TripRequirementInitial extends TripRequirementState {
-  const TripRequirementInitial();
+  const TripRequirementInitial({required super.exception});
 }
 
 class TripRequirementLoadInProgress extends TripRequirementState {
-  const TripRequirementLoadInProgress();
+  const TripRequirementLoadInProgress({required super.exception});
 }
 
-class TripRequirementLoadSuccess extends TripRequirementState {
+class TripRequirementLoaded extends TripRequirementState {
   final List<DatabaseRequirement> dataRows;
 
-  const TripRequirementLoadSuccess({required this.dataRows});
-}
-
-class TripRequirementLoadFailure extends TripRequirementState {
-  const TripRequirementLoadFailure();
+  const TripRequirementLoaded(
+      {required this.dataRows, required super.exception});
 }
 
 class TripRequirementAddInProgress extends TripRequirementState {
-  const TripRequirementAddInProgress();
+  const TripRequirementAddInProgress({required super.exception});
 }
 
-class TripRequirementAddSuccess extends TripRequirementState {
-  const TripRequirementAddSuccess();
-}
-
-class TripRequirementAddFailure extends TripRequirementState {
-  const TripRequirementAddFailure();
+class TripRequirementAdded extends TripRequirementState {
+  const TripRequirementAdded({required super.exception});
 }
 
 class TripRequirementUpdateInProgress extends TripRequirementState {
-  const TripRequirementUpdateInProgress();
+  const TripRequirementUpdateInProgress({required super.exception});
 }
 
-class TripRequirementUpdateSuccess extends TripRequirementState {
-  const TripRequirementUpdateSuccess();
-}
-
-class TripRequirementUpdateFailure extends TripRequirementState {
-  const TripRequirementUpdateFailure();
+class TripRequirementUpdated extends TripRequirementState {
+  const TripRequirementUpdated({required super.exception});
 }
 
 class TripRequirementDeleteInProgress extends TripRequirementState {
-  const TripRequirementDeleteInProgress();
+  const TripRequirementDeleteInProgress({required super.exception});
 }
 
-class TripRequirementDeleteSuccess extends TripRequirementState {
-  const TripRequirementDeleteSuccess();
-}
-
-class TripRequirementDeleteFailure extends TripRequirementState {
-  const TripRequirementDeleteFailure();
+class TripRequirementDeleted extends TripRequirementState {
+  const TripRequirementDeleted({required super.exception});
 }
 
 class TripRequirementDeleteAllInProgress extends TripRequirementState {
-  const TripRequirementDeleteAllInProgress();
+  const TripRequirementDeleteAllInProgress({required super.exception});
 }
 
-class TripRequirementDeleteAllSuccess extends TripRequirementState {
-  const TripRequirementDeleteAllSuccess();
-}
-
-class TripRequirementDeleteAllFailure extends TripRequirementState {
-  const TripRequirementDeleteAllFailure();
+class TripRequirementDeletedAll extends TripRequirementState {
+  const TripRequirementDeletedAll({required super.exception});
 }

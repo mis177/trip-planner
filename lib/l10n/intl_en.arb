@@ -1,4 +1,8 @@
 {
+    "trip_lang_pl" : "Polish",
+    "trip_lang_en" : "English",
+
+
     "trip_costs_title" : "Trip costs",
     "trip_costs_added" : "Cost added",
     "trip_costs_deleted" : "Cost deleted",
@@ -13,6 +17,11 @@
     "trip_costs_delete" : "Costs delete",
     "trip_costs_delete_content" : "Are you sure that you want to delete all costs?",
     "trip_costs_activity_hint" : "Activity name",
+    "trip_costs_error_add" : "Problem when adding new cost",
+    "trip_costs_error_remove" : "Problem when deleting cost",
+    "trip_costs_error_remove_all" : "Problem when deleting all costs",
+    "trip_costs_error_update" : "Problem when updating cost",
+
 
 
     "trip_edit_share_name" : "Name",
@@ -55,6 +64,11 @@
     "trip_requirements_dialog_title" : "Requirements delete" ,
     "trip_requirements_dialog_content" : "Are you sure that you want to delete all requirements?" ,
     "trip_requirements_requirement_hint" : "requirement",
+    "trip_requirements_error_add" : "Problem when adding requirement",
+    "trip_requirements_error_remove" : "Problem when deleting requirement",
+    "trip_requirements_error_remove_all" : "Problem when deleting all requirements",
+
+
 
     "trips_list_title" : "Your trips",
     "trips_list_removed" : "Trip removed",
@@ -62,8 +76,10 @@
     "trips_list_deleting" : "Deleting trip...",
     "trips_list_loading" : "Loading trips...",
     "trips_list_dialog_title" : "Trip delete",
-    "trips_list_dialog_content" : "Are you sure that you want to delete this trip?"
-
+    "trips_list_dialog_content" : "Are you sure that you want to delete this trip?",
+    "trip_list_error_load_trips" : "Problem when loading trips",
+    "trip_list_error_load_list" : "Problem when loading list",
+    "trip_list_error_remove" : "Problem when removing trip"
 
 
 }

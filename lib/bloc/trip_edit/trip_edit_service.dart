@@ -1,14 +1,14 @@
 import 'package:share_plus/share_plus.dart';
 import 'package:tripplanner/models/trips.dart';
-import 'package:tripplanner/services/crud/database_trip_provider.dart';
+import 'package:tripplanner/services/crud/trips_repository.dart';
 
-class TripEditUtils {
-  late final provider = DatabaseTripsProvider();
+class TripEditService {
+  late final _repository = TripsRepository();
 
   // singleton
-  static final TripEditUtils _instance = TripEditUtils._internal();
-  TripEditUtils._internal();
-  factory TripEditUtils() {
+  static final TripEditService _instance = TripEditService._internal();
+  TripEditService._internal();
+  factory TripEditService() {
     return _instance;
   }
 
@@ -17,7 +17,7 @@ class TripEditUtils {
     required String text,
     required DatabaseTrip trip,
   }) async {
-    await provider.updateTrip(
+    await _repository.updateTrip(
       trip.id,
       fieldName,
       text,
@@ -28,7 +28,7 @@ class TripEditUtils {
     required DatabaseTrip trip,
     required List<String> message,
   }) async {
-    var sharedTrip = provider.getTrip(trip.id);
+    var sharedTrip = _repository.getTrip(trip.id);
     String tripCosts = '';
     for (var cost in sharedTrip.costs) {
       tripCosts +=

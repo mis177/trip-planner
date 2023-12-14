@@ -1,69 +1,81 @@
 import 'package:bloc/bloc.dart';
-import 'package:tripplanner/bloc/trip_list/trip_list_utils.dart';
+import 'package:tripplanner/bloc/trip_list/trip_list_service.dart';
 import 'package:tripplanner/bloc/trip_list/trip_list_event.dart';
 import 'package:tripplanner/bloc/trip_list/trip_list_state.dart';
 import 'package:tripplanner/const/routes.dart';
 import 'package:tripplanner/models/trips.dart';
-import 'package:tripplanner/utilities/dialogs/confirmation_dialog.dart';
 
 class TripListBloc extends Bloc<TripListEvent, TripListState> {
-  TripListBloc(TripListUtils utils) : super(const TripListInitial()) {
+  TripListBloc(TripListService utils)
+      : super(const TripListInitial(exception: null)) {
     on<TripListLoadAll>((event, emit) async {
       Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripListLoadInProgress());
-      List<DatabaseTrip> tripsList = await utils.getAllTrips();
-      //simulating complex compution
+      emit(const TripListLoadInProgress(exception: null));
+      List<DatabaseTrip> tripsList = [];
+      Exception? exception;
+      try {
+        tripsList = await utils.getAllTrips();
+      } on Exception catch (e) {
+        exception = e;
+      }
+
+      // for prettier display
       if (stopwatch.elapsed.inMilliseconds < 250) {
         await Future.delayed(
             Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
       }
-      emit(TripListLoadSuccess(allTrips: tripsList));
-
-      //emit(TripListLoadFailure()); TODO
+      emit(TripListLoaded(allTrips: tripsList, exception: exception));
     });
 
     on<TripListAdd>((event, emit) async {
       Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripListAddInProgress());
-      DatabaseTrip newTrip = await utils.addTrip();
-//simulating complex compution
-      if (stopwatch.elapsed.inMilliseconds < 200) {
-        await Future.delayed(
-            Duration(milliseconds: 200 - stopwatch.elapsed.inMilliseconds));
+      emit(const TripListAddInProgress(exception: null));
+      DatabaseTrip newTrip = DatabaseTrip.empty();
+      Exception? exception;
+      try {
+        newTrip = await utils.addTrip();
+      } on Exception catch (e) {
+        exception = e;
       }
 
-      emit(TripListAddSuccess(
-        trip: newTrip,
-        route: tripEditRoute,
-      ));
-      //simulating complex compution
+      // for prettier display
       if (stopwatch.elapsed.inMilliseconds < 250) {
         await Future.delayed(
             Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
       }
+
+      emit(TripListAdded(
+        trip: newTrip,
+        route: tripEditRoute,
+        exception: exception,
+      ));
     });
 
     on<TripListRemove>((event, emit) async {
-      final shouldDelete = await showConfirmationDialog(
-        context: event.context,
-        title: event.dialogTitle,
-        content: event.dialogContent,
-      );
-
-      if (shouldDelete == true) {
+      if (event.shouldDelete == true) {
         Stopwatch stopwatch = Stopwatch()..start();
-        emit(const TripListRemoveInProgress());
-        await utils.deleteTrip(event.trip);
-        List<DatabaseTrip> tripsList = await utils.getAllTrips();
+        emit(const TripListRemoveInProgress(exception: null));
+        Exception? exception;
+        try {
+          await utils.deleteTrip(event.trip);
+        } on Exception catch (e) {
+          exception = e;
+        }
+        List<DatabaseTrip> tripsList = [];
+        Exception? exceptionAllTrips;
+        try {
+          tripsList = await utils.getAllTrips();
+        } on Exception catch (e) {
+          exception = e;
+        }
 
-        //  emit(const TripListInitial());
-        //simulating complex compution
+        // for prettier display
         if (stopwatch.elapsed.inMilliseconds < 250) {
           await Future.delayed(
               Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
         }
-        emit(const TripListRemoveSuccess());
-        emit(TripListLoadSuccess(allTrips: tripsList));
+        emit(TripListRemoved(exception: exception));
+        emit(TripListLoaded(allTrips: tripsList, exception: exceptionAllTrips));
       }
     });
 
@@ -71,6 +83,7 @@ class TripListBloc extends Bloc<TripListEvent, TripListState> {
       emit(TripListClicked(
         route: tripEditRoute,
         trip: event.trip,
+        exception: null,
       ));
     });
   }

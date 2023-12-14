@@ -6,15 +6,14 @@ import 'package:sqflite/sqflite.dart';
 import 'package:tripplanner/models/trips.dart';
 import 'package:tripplanner/services/crud/crud_exceptions.dart';
 
-class DatabaseTripsProvider {
+class TripsRepository {
   Database? _db;
   List<DatabaseTrip> _trips = [];
   late final StreamController<List<DatabaseTrip>> _tripsStreamController;
   // singleton
-  factory DatabaseTripsProvider() => _instance;
-  static final DatabaseTripsProvider _instance =
-      DatabaseTripsProvider._internal();
-  DatabaseTripsProvider._internal() {
+  factory TripsRepository() => _instance;
+  static final TripsRepository _instance = TripsRepository._internal();
+  TripsRepository._internal() {
     _tripsStreamController = StreamController<List<DatabaseTrip>>.broadcast(
       onListen: () {
         _tripsStreamController.sink.add(_trips);
@@ -138,7 +137,7 @@ class DatabaseTripsProvider {
     _tripsStreamController.add(_trips);
   }
 
-  Future<DatabaseCost> addCost(int tripId) async {
+  Future<void> addCost(int tripId) async {
     await _ensureDbIsOpen();
     final db = getDatabase();
     DatabaseCost newCost = DatabaseCost(
@@ -160,7 +159,7 @@ class DatabaseTripsProvider {
     );
 
     _trips.singleWhere((element) => element.id == tripId).costs.add(newCost);
-    return newCost;
+    //return newCost;
   }
 
   Future<void> updateCost(DatabaseCost cost, String field, value) async {
@@ -299,7 +298,6 @@ class DatabaseTripsProvider {
   }
 
   Future<void> openDb() async {
-    //await _db!.query('DROP TABLE IF EXISTS trips');
     if (_db == null) {
       try {
         final appDocsPath = await getApplicationDocumentsDirectory();
@@ -311,6 +309,8 @@ class DatabaseTripsProvider {
         await db.execute(createTripsTable);
       } on MissingPlatformDirectoryException {
         throw UnableToGetDocumentsDirectoryException();
+      } catch (e) {
+        throw UnknownDatabaseException();
       }
     }
 

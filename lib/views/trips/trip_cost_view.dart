@@ -4,9 +4,11 @@ import 'package:tripplanner/bloc/trip_cost/trip_cost_bloc.dart';
 import 'package:tripplanner/bloc/trip_cost/trip_cost_event.dart';
 import 'package:tripplanner/bloc/trip_cost/trip_cost_state.dart';
 import 'package:tripplanner/models/trips.dart';
-import 'package:tripplanner/utilities/get_argument.dart';
+import 'package:tripplanner/extensions/buildcontext/get_argument.dart';
+import 'package:tripplanner/utilities/dialogs/confirmation_dialog.dart';
+import 'package:tripplanner/utilities/dialogs/error_dialog.dart';
 import 'package:tripplanner/utilities/loading_screen/loading_screen.dart';
-import 'package:tripplanner/bloc/trip_cost/trip_costs_utils.dart';
+import 'package:tripplanner/bloc/trip_cost/trip_costs_service.dart';
 import 'package:tripplanner/extensions/buildcontext/loc.dart';
 
 class CostsView extends StatefulWidget {
@@ -21,7 +23,7 @@ class _CostsViewState extends State<CostsView> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => TripCostBloc(
-        TripCostUtils(),
+        TripCostService(),
       ),
       child: const CostsListView(),
     );
@@ -39,7 +41,6 @@ class _CostsListViewState extends State<CostsListView> {
   void showSnackBar(String text) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: Colors.green,
         content: Text(text),
         duration: const Duration(milliseconds: 350),
       ),
@@ -52,14 +53,38 @@ class _CostsListViewState extends State<CostsListView> {
       appBar: AppBar(
         title: Text(context.loc.trip_costs_title),
       ),
-      body:
-          BlocConsumer<TripCostBloc, TripCostState>(listener: (context, state) {
-        if (state is TripCostAddSuccess) {
-          showSnackBar(context.loc.trip_costs_added);
-        } else if (state is TripCostDeleteSuccess) {
-          showSnackBar(context.loc.trip_costs_deleted);
-        } else if (state is TripCostDeleteAllSuccess) {
-          showSnackBar(context.loc.trip_costs_deleted_all);
+      body: BlocConsumer<TripCostBloc, TripCostState>(
+          listener: (context, state) async {
+        if (state is TripCostAdded) {
+          if (state.exception == null) {
+            showSnackBar(context.loc.trip_costs_added);
+          } else {
+            await showErrorDialog(
+                context: context, content: context.loc.trip_costs_error_add);
+          }
+        } else if (state is TripCostDeleted) {
+          if (state.exception == null) {
+            showSnackBar(context.loc.trip_costs_deleted);
+          } else {
+            await showErrorDialog(
+                context: context, content: context.loc.trip_costs_error_remove);
+          }
+        } else if (state is TripCostDeleted) {
+          if (state.exception == null) {
+            showSnackBar(context.loc.trip_costs_deleted);
+          } else {
+            await showErrorDialog(
+                context: context, content: context.loc.trip_costs_error_remove);
+          }
+        } else if (state is TripCostUpdated) {
+          if (state.exception != null) {
+            await showErrorDialog(
+                context: context, content: context.loc.trip_costs_error_update);
+            if (mounted) {
+              context.read<TripCostBloc>().add(
+                  TripCostLoadAll(trip: context.getArgument<DatabaseTrip>()!));
+            }
+          }
         } else if (state is TripCostLoadInProgress) {
           LoadingScreen()
               .show(context: context, text: context.loc.trip_costs_loading);
@@ -75,18 +100,12 @@ class _CostsListViewState extends State<CostsListView> {
         } else {
           LoadingScreen().hide();
         }
-
-        // if (state.isLoading) {
-        //   LoadingScreen().show(context: context, text: state.loadingText);
-        // } else {
-        //   LoadingScreen().hide();
-        // }
       }, builder: (context, state) {
         if (state is TripCostInitial) {
           context
               .read<TripCostBloc>()
               .add(TripCostLoadAll(trip: context.getArgument<DatabaseTrip>()!));
-        } else if (state is TripCostLoadSuccess) {
+        } else if (state is TripCostLoaded) {
           late final width = MediaQuery.of(context).size.width;
 
           return SingleChildScrollView(
@@ -98,6 +117,8 @@ class _CostsListViewState extends State<CostsListView> {
                     width: width * 0.3,
                     child: Center(
                       child: Text(
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: true,
                         context.loc.trip_costs_activity,
                         style: const TextStyle(fontStyle: FontStyle.italic),
                       ),
@@ -109,6 +130,8 @@ class _CostsListViewState extends State<CostsListView> {
                     width: width * 0.15,
                     child: Center(
                       child: Text(
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: true,
                         context.loc.trip_costs_planned,
                         style: const TextStyle(fontStyle: FontStyle.italic),
                       ),
@@ -121,6 +144,8 @@ class _CostsListViewState extends State<CostsListView> {
                     width: width * 0.15,
                     child: Center(
                       child: Text(
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: true,
                         context.loc.trip_costs_real,
                         style: const TextStyle(fontStyle: FontStyle.italic),
                       ),
@@ -132,13 +157,17 @@ class _CostsListViewState extends State<CostsListView> {
                     width: width * 0.1,
                     child: IconButton(
                       onPressed: () async {
-                        context.read<TripCostBloc>().add(TripCostRemoveAll(
-                              trip: context.getArgument<DatabaseTrip>()!,
-                              context: context,
-                              dialogTitle: context.loc.trip_costs_delete,
-                              dialogContent:
-                                  context.loc.trip_costs_delete_content,
-                            ));
+                        final shouldDelete = await showConfirmationDialog(
+                          context: context,
+                          title: context.loc.trip_costs_delete,
+                          content: context.loc.trip_costs_delete_content,
+                        );
+                        if (mounted) {
+                          context.read<TripCostBloc>().add(TripCostRemoveAll(
+                                trip: context.getArgument<DatabaseTrip>()!,
+                                shouldDelete: shouldDelete,
+                              ));
+                        }
                       },
                       icon: const Icon(Icons.delete_forever),
                     ),
@@ -155,9 +184,11 @@ class _CostsListViewState extends State<CostsListView> {
                       DataCell(
                         SizedBox(
                           width: width * 0.3,
+                          height: null,
                           child: TextFormField(
                             initialValue: cost.activity,
                             decoration: InputDecoration(
+                              isCollapsed: true,
                               hintText: context.loc.trip_costs_activity_hint,
                             ),
                             keyboardType: TextInputType.multiline,
@@ -183,8 +214,8 @@ class _CostsListViewState extends State<CostsListView> {
                                   ? ''
                                   : cost.planned.toString(),
                               keyboardType: TextInputType.number,
-                              // controller: plannedCostTextController,
                               decoration: const InputDecoration(
+                                isCollapsed: true,
                                 hintText: '...',
                               ),
                               textInputAction: TextInputAction.next,
@@ -219,6 +250,7 @@ class _CostsListViewState extends State<CostsListView> {
                                   ));
                             },
                             decoration: InputDecoration(
+                              isCollapsed: true,
                               hintText: '...',
                               filled: true,
                               fillColor: MaterialStateColor.resolveWith(
@@ -260,7 +292,7 @@ class _CostsListViewState extends State<CostsListView> {
             ),
           );
         }
-        return const CircularProgressIndicator();
+        return Container();
       }),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),

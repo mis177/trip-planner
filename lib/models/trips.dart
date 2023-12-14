@@ -17,6 +17,17 @@ class DatabaseTrip {
     required this.requirements,
   });
 
+  factory DatabaseTrip.empty() {
+    return DatabaseTrip(
+        id: -1,
+        name: '',
+        destination: '',
+        date: '',
+        note: '',
+        costs: [],
+        requirements: []);
+  }
+
   DatabaseTrip.fromRow(Map<String, Object?> map,
       List<Map<String, Object?>> costs, List<Map<String, Object?>> requirements)
       : id = map[idColumn] as int,

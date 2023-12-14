@@ -53,15 +53,11 @@ class TripRequirementRemove extends TripRequirementEvent {
 
 class TripRequirementRemoveAll extends TripRequirementEvent {
   final DatabaseTrip trip;
-  final BuildContext context;
-  final String dialogTitle;
-  final String dialogContent;
+  final bool? shouldDelete;
 
   const TripRequirementRemoveAll({
     required this.trip,
-    required this.context,
-    required this.dialogTitle,
-    required this.dialogContent,
+    required this.shouldDelete,
   });
   @override
   List<Object?> get props => [trip.id];

@@ -1,59 +1,47 @@
 import 'package:equatable/equatable.dart';
 import 'package:tripplanner/models/trips.dart';
 
-sealed class TripListState extends Equatable {
+abstract class TripListState extends Equatable {
   final List<DatabaseTrip> allTrips;
-  const TripListState({
-    this.allTrips = const [],
-  });
+  final Exception? exception;
+  const TripListState({this.allTrips = const [], required this.exception});
   @override
   List<Object?> get props => [];
 }
 
 class TripListInitial extends TripListState {
-  const TripListInitial({super.allTrips});
+  const TripListInitial({super.allTrips, required super.exception});
 }
 
 class TripListLoadInProgress extends TripListState {
-  const TripListLoadInProgress({super.allTrips});
+  const TripListLoadInProgress({super.allTrips, required super.exception});
 }
 
-class TripListLoadSuccess extends TripListState {
-  const TripListLoadSuccess({super.allTrips});
-}
-
-class TripListLoadFailure extends TripListState {
-  const TripListLoadFailure({super.allTrips});
+class TripListLoaded extends TripListState {
+  const TripListLoaded({super.allTrips, required super.exception});
 }
 
 class TripListAddInProgress extends TripListState {
-  const TripListAddInProgress({super.allTrips});
+  const TripListAddInProgress({super.allTrips, required super.exception});
 }
 
-class TripListAddSuccess extends TripListState {
+class TripListAdded extends TripListState {
   final String route;
   final DatabaseTrip trip;
-  const TripListAddSuccess({
+  const TripListAdded({
     required this.route,
     required this.trip,
     super.allTrips,
+    required super.exception,
   });
 }
 
-class TripListAddFailure extends TripListState {
-  const TripListAddFailure({super.allTrips});
-}
-
 class TripListRemoveInProgress extends TripListState {
-  const TripListRemoveInProgress({super.allTrips});
+  const TripListRemoveInProgress({super.allTrips, required super.exception});
 }
 
-class TripListRemoveSuccess extends TripListState {
-  const TripListRemoveSuccess({super.allTrips});
-}
-
-class TripListRemoveFailure extends TripListState {
-  const TripListRemoveFailure({super.allTrips});
+class TripListRemoved extends TripListState {
+  const TripListRemoved({super.allTrips, required super.exception});
 }
 
 class TripListClicked extends TripListState {
@@ -63,9 +51,6 @@ class TripListClicked extends TripListState {
     required this.route,
     required this.trip,
     super.allTrips,
+    required super.exception,
   });
-}
-
-class TripListClickFailure extends TripListState {
-  const TripListClickFailure({super.allTrips});
 }

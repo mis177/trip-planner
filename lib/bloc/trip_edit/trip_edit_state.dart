@@ -3,7 +3,9 @@ import 'package:tripplanner/models/trips.dart';
 
 sealed class TripEditState extends Equatable {
   final DatabaseTrip? trip;
+  final Exception? exception;
   const TripEditState({
+    required this.exception,
     this.trip,
   });
   @override
@@ -13,55 +15,43 @@ sealed class TripEditState extends Equatable {
 class TripEditInitial extends TripEditState {
   const TripEditInitial({
     super.trip,
+    required super.exception,
   });
 }
 
 class TripEditLoadInProgress extends TripEditState {
   const TripEditLoadInProgress({
     super.trip,
+    required super.exception,
   });
 }
 
-class TripEditLoadSuccess extends TripEditState {
-  const TripEditLoadSuccess({
+class TripEditLoaded extends TripEditState {
+  const TripEditLoaded({
     super.trip,
-  });
-}
-
-class TripEditLoadFailure extends TripEditState {
-  const TripEditLoadFailure({
-    super.trip,
+    required super.exception,
   });
 }
 
 class TripEditUpdateInProgress extends TripEditState {
   const TripEditUpdateInProgress({
     super.trip,
+    required super.exception,
   });
 }
 
-class TripEditUpdateSuccess extends TripEditState {
-  const TripEditUpdateSuccess({
+class TripEditUpdated extends TripEditState {
+  const TripEditUpdated({
     super.trip,
+    required super.exception,
   });
 }
 
-class TripEditUpdateFailure extends TripEditState {
-  const TripEditUpdateFailure({
-    super.trip,
-  });
-}
-
-class TripEditTableSelect extends TripEditState {
+class TripEditTableSelected extends TripEditState {
   final String route;
-  const TripEditTableSelect({
+  const TripEditTableSelected({
     required this.route,
     super.trip,
-  });
-}
-
-class TripEditTableSelectFailure extends TripEditState {
-  const TripEditTableSelectFailure({
-    super.trip,
+    required super.exception,
   });
 }

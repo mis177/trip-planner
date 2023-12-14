@@ -45,6 +45,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any
+  http: ^1.1.2
+  bloc_test: ^9.1.5
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +58,10 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^3.0.1
+  test: ^1.24.9
+  mockito: ^5.4.3
+  build_runner: ^2.4.7
+  mocktail: ^1.0.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

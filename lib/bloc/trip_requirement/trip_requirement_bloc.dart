@@ -1,17 +1,17 @@
 import 'package:bloc/bloc.dart';
 import 'package:tripplanner/bloc/trip_requirement/trip_requirement_event.dart';
 import 'package:tripplanner/bloc/trip_requirement/trip_requirement_state.dart';
-import 'package:tripplanner/bloc/trip_requirement/trip_requirements_utils.dart';
+import 'package:tripplanner/bloc/trip_requirement/trip_requirements_service.dart';
 import 'package:tripplanner/models/trips.dart';
-import 'package:tripplanner/utilities/dialogs/confirmation_dialog.dart';
 
 class TripRequirementBloc
     extends Bloc<TripRequirementEvent, TripRequirementState> {
-  TripRequirementBloc(TripRequirementUtils utils)
-      : super(const TripRequirementInitial()) {
+  TripRequirementBloc(TripRequirementService utils)
+      : super(const TripRequirementInitial(exception: null)) {
     on<TripRequirementLoadAll>((event, emit) async {
       Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripRequirementLoadInProgress());
+      emit(const TripRequirementLoadInProgress(exception: null));
+      // for prettier display
       if (stopwatch.elapsed.inMilliseconds < 250) {
         await Future.delayed(
             Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
@@ -19,75 +19,97 @@ class TripRequirementBloc
       List<DatabaseRequirement> dataRows =
           utils.loadExistingRequirement(event.trip);
 
-      emit(TripRequirementLoadSuccess(
+      emit(TripRequirementLoaded(
         dataRows: dataRows,
+        exception: null,
       ));
     });
 
     on<TripRequirementAdd>((event, emit) async {
       Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripRequirementAddInProgress());
+      emit(const TripRequirementAddInProgress(exception: null));
 
-      await utils.addRequirement(event.trip);
+      Exception? exception;
+      try {
+        await utils.addRequirement(event.trip);
+      } on Exception catch (e) {
+        exception = e;
+      }
+      // for prettier display
       if (stopwatch.elapsed.inMilliseconds < 250) {
         await Future.delayed(
             Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
       }
-      emit(const TripRequirementAddSuccess());
+      emit(TripRequirementAdded(exception: exception));
 
       List<DatabaseRequirement> dataRows =
           utils.loadExistingRequirement(event.trip);
 
-      emit(TripRequirementLoadSuccess(
+      emit(TripRequirementLoaded(
         dataRows: dataRows,
+        exception: null,
       ));
     });
 
     on<TripRequirementUpdate>((event, emit) async {
-      //emit(TripRequirementUpdateInProgress(isLoading: true));
-      await utils.updateRequirement(
-        fieldName: event.fieldName,
-        text: event.text,
-        requirement: event.requirement,
-      );
-      //   emit(TripRequirementUpdateSuccess());
+      Exception? exception;
+      try {
+        await utils.updateRequirement(
+          fieldName: event.fieldName,
+          text: event.text,
+          requirement: event.requirement,
+        );
+      } on Exception catch (e) {
+        exception = e;
+        emit(TripRequirementUpdated(exception: exception));
+      }
     });
 
     on<TripRequirementRemove>((event, emit) async {
       Stopwatch stopwatch = Stopwatch()..start();
-      emit(const TripRequirementDeleteInProgress());
-      await utils.deleteRequirement(event.requirement);
+      emit(const TripRequirementDeleteInProgress(exception: null));
+      Exception? exception;
+      try {
+        await utils.deleteRequirement(event.requirement);
+      } on Exception catch (e) {
+        exception = e;
+      }
+      // for prettier display
       if (stopwatch.elapsed.inMilliseconds < 250) {
         await Future.delayed(
             Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
       }
-      emit(const TripRequirementDeleteSuccess());
+      emit(TripRequirementDeleted(exception: exception));
 
       List<DatabaseRequirement> dataRows =
           utils.loadExistingRequirement(event.trip);
 
-      emit(TripRequirementLoadSuccess(
+      emit(TripRequirementLoaded(
         dataRows: dataRows,
+        exception: null,
       ));
     });
 
     on<TripRequirementRemoveAll>((event, emit) async {
-      final shouldDelete = await showConfirmationDialog(
-        context: event.context,
-        title: event.dialogTitle,
-        content: event.dialogContent,
-      );
-      if (shouldDelete == true) {
+      if (event.shouldDelete == true) {
         Stopwatch stopwatch = Stopwatch()..start();
-        emit(const TripRequirementDeleteAllInProgress());
-        await utils.deleteAllRequirement(event.trip);
+        emit(const TripRequirementDeleteAllInProgress(exception: null));
+
+        Exception? exception;
+        try {
+          await utils.deleteAllRequirement(event.trip);
+        } on Exception catch (e) {
+          exception = e;
+        }
+        // for prettier display
         if (stopwatch.elapsed.inMilliseconds < 250) {
           await Future.delayed(
               Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
         }
-        emit(const TripRequirementDeleteAllSuccess());
-        emit(const TripRequirementLoadSuccess(
+        emit(TripRequirementDeletedAll(exception: exception));
+        emit(const TripRequirementLoaded(
           dataRows: [],
+          exception: null,
         ));
       }
     });

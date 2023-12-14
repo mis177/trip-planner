@@ -2,76 +2,57 @@ import 'package:equatable/equatable.dart';
 import 'package:tripplanner/models/trips.dart';
 
 sealed class TripCostState extends Equatable {
-  const TripCostState();
+  final Exception? exception;
+  const TripCostState({required this.exception});
   @override
   List<Object?> get props => [];
 }
 
 class TripCostInitial extends TripCostState {
-  const TripCostInitial();
+  const TripCostInitial({required super.exception});
 }
 
 class TripCostLoadInProgress extends TripCostState {
-  const TripCostLoadInProgress();
+  const TripCostLoadInProgress({required super.exception});
 }
 
-class TripCostLoadSuccess extends TripCostState {
+class TripCostLoaded extends TripCostState {
   final List<DatabaseCost> dataRows;
 
-  const TripCostLoadSuccess({required this.dataRows});
+  const TripCostLoaded({required this.dataRows, required super.exception});
 
   @override
   List<Object?> get props => [dataRows];
 }
 
-class TripCostLoadFailure extends TripCostState {
-  const TripCostLoadFailure();
-}
-
 class TripCostAddInProgress extends TripCostState {
-  const TripCostAddInProgress();
+  const TripCostAddInProgress({required super.exception});
 }
 
-class TripCostAddSuccess extends TripCostState {
-  const TripCostAddSuccess();
-}
-
-class TripCostAddFailure extends TripCostState {
-  const TripCostAddFailure();
+class TripCostAdded extends TripCostState {
+  const TripCostAdded({required super.exception});
 }
 
 class TripCostUpdateInProgress extends TripCostState {
-  const TripCostUpdateInProgress();
+  const TripCostUpdateInProgress({required super.exception});
 }
 
-class TripCostUpdateSuccess extends TripCostState {
-  const TripCostUpdateSuccess();
-}
-
-class TripCostUpdateFailure extends TripCostState {
-  const TripCostUpdateFailure();
+class TripCostUpdated extends TripCostState {
+  const TripCostUpdated({required super.exception});
 }
 
 class TripCostDeleteInProgress extends TripCostState {
-  const TripCostDeleteInProgress();
+  const TripCostDeleteInProgress({required super.exception});
 }
 
-class TripCostDeleteSuccess extends TripCostState {
-  const TripCostDeleteSuccess();
-}
-
-class TripCostDeleteFailure extends TripCostState {
-  const TripCostDeleteFailure();
+class TripCostDeleted extends TripCostState {
+  const TripCostDeleted({required super.exception});
 }
 
 class TripCostDeleteAllInProgress extends TripCostState {
-  const TripCostDeleteAllInProgress();
+  const TripCostDeleteAllInProgress({required super.exception});
 }
 
-class TripCostDeleteAllSuccess extends TripCostState {
-  const TripCostDeleteAllSuccess();
-}
-
-class TripCostDeleteAllFailure extends TripCostState {
-  const TripCostDeleteAllFailure();
+class TripCostDeletedAll extends TripCostState {
+  const TripCostDeletedAll({required super.exception});
 }

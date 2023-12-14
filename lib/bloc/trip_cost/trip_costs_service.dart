@@ -1,22 +1,27 @@
 import 'package:tripplanner/models/trips.dart';
-import 'package:tripplanner/services/crud/database_trip_provider.dart';
+import 'package:tripplanner/services/crud/trips_repository.dart';
 
-class TripCostUtils {
-  late final provider = DatabaseTripsProvider();
+class TripCostService {
+  late final TripsRepository _repository = TripsRepository();
 
   // singleton
-  static final TripCostUtils _instance = TripCostUtils._internal();
-  TripCostUtils._internal();
-  factory TripCostUtils() {
+  static final TripCostService _instance = TripCostService._internal();
+  TripCostService._internal();
+  factory TripCostService() {
     return _instance;
   }
 
   Future<void> addCost(DatabaseTrip trip) async {
-    await provider.addCost(trip.id);
+    Stopwatch stopwatch = Stopwatch()..start();
+    await _repository.addCost(trip.id);
+    if (stopwatch.elapsed.inMilliseconds < 250) {
+      await Future.delayed(
+          Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
+    }
   }
 
   List<DatabaseCost> loadExistingCost(DatabaseTrip existingTrip) {
-    var trip = provider.getTrip(existingTrip.id);
+    var trip = _repository.getTrip(existingTrip.id);
     List<DatabaseCost> newDataRows = [];
 
     if (trip.costs.isNotEmpty) {
@@ -34,7 +39,7 @@ class TripCostUtils {
     required String text,
     required DatabaseCost cost,
   }) async {
-    await provider.updateCost(
+    await _repository.updateCost(
       cost,
       fieldName,
       text,
@@ -42,17 +47,17 @@ class TripCostUtils {
   }
 
   Future<void> deleteCost(DatabaseCost cost) async {
-    await provider.deleteCost(cost);
+    await _repository.deleteCost(cost);
   }
 
   Future<void> deleteAllCost(DatabaseTrip existingTrip) async {
-    var trip = provider.getTrip(existingTrip.id);
+    var trip = _repository.getTrip(existingTrip.id);
     List<DatabaseCost> toRemove = [];
     for (var cost in trip.costs) {
       toRemove.add(cost);
     }
     for (var cost in toRemove) {
-      await provider.deleteCost(cost);
+      await _repository.deleteCost(cost);
     }
   }
 }
