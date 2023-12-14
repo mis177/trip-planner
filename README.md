@@ -7,7 +7,7 @@ Local database is SQLite.
 # Screenshots
 
 
-![368511979_1433940637472500_5390247463115877203_n](https://github.com/mis177/trip-planner/assets/56123042/116b9896-c0e5-4daa-b6f3-e18f3d39156a)
+![368511979_1433940637472500_5390247463115877203_n](https://github.com/mis177/trip-planner/assets/56123042/a33ab527-5bcd-41d3-a353-f3a7f59139d9)
 
 
 
