@@ -3,7 +3,6 @@ import 'package:tripplanner/bloc/trip_cost/trip_cost_state.dart';
 import 'package:bloc/bloc.dart';
 import 'package:tripplanner/models/trips.dart';
 import 'package:tripplanner/bloc/trip_cost/trip_costs_service.dart';
-import 'package:tripplanner/utilities/dialogs/confirmation_dialog.dart';
 
 class TripCostBloc extends Bloc<TripCostEvent, TripCostState> {
   TripCostBloc(TripCostService utils)
