@@ -44,10 +44,9 @@
     "trip_edit_date_helper" : "Data Twojej podróży",
     "trip_edit_notes_hint" : "Notatki",
     "trip_edit_notes_helper" : "Twoje notatki",
-    "trip_edit_costs_hint" : "Koszty podróży [.....]",
+    "trip_edit_costs_hint" : "Koszty [.....]",
     "trip_edit_costs_helper" : "Koszty Twojej podróży",
-    "trip_edit_requirements_hint" : "Wymagania [.....]",
-    "trip_edit_requirements_helper" : "Wymagania przed podróżą",
+    
 
 
     "trip_requirements_title" : "Wymagania" ,
@@ -66,6 +65,7 @@
      "trip_requirements_error_add" : "Problem podczas dodawania wymagania",
     "trip_requirements_error_remove" : "Problem podczas usuwania wymagania",
     "trip_requirements_error_remove_all" : "Problem podczas usuwania wszystkich wymagań",
+    "trip_edit_requirements_hint" : "Wymagania [.....]",
 
     "trips_list_title" : "Twoje podróże",
     "trips_list_removed" : "Usunięto podróż",

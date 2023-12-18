@@ -109,121 +109,102 @@ class _CostsListViewState extends State<CostsListView> {
           late final width = MediaQuery.of(context).size.width;
 
           return SingleChildScrollView(
-            child: DataTable(
-              columnSpacing: 20,
-              columns: [
-                DataColumn(
-                  label: SizedBox(
-                    width: width * 0.3,
-                    child: Center(
-                      child: Text(
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
-                        context.loc.trip_costs_activity,
-                        style: const TextStyle(fontStyle: FontStyle.italic),
-                      ),
-                    ),
-                  ),
-                ),
-                DataColumn(
-                  label: SizedBox(
-                    width: width * 0.15,
-                    child: Center(
-                      child: Text(
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
-                        context.loc.trip_costs_planned,
-                        style: const TextStyle(fontStyle: FontStyle.italic),
-                      ),
-                    ),
-                  ),
-                  numeric: true,
-                ),
-                DataColumn(
-                  label: SizedBox(
-                    width: width * 0.15,
-                    child: Center(
-                      child: Text(
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
-                        context.loc.trip_costs_real,
-                        style: const TextStyle(fontStyle: FontStyle.italic),
-                      ),
-                    ),
-                  ),
-                ),
-                DataColumn(
-                  label: SizedBox(
-                    width: width * 0.1,
-                    child: IconButton(
-                      onPressed: () async {
-                        final shouldDelete = await showConfirmationDialog(
-                          context: context,
-                          title: context.loc.trip_costs_delete,
-                          content: context.loc.trip_costs_delete_content,
-                        );
-                        if (mounted) {
-                          context.read<TripCostBloc>().add(TripCostRemoveAll(
-                                trip: context.getArgument<DatabaseTrip>()!,
-                                shouldDelete: shouldDelete,
-                              ));
-                        }
-                      },
-                      icon: const Icon(Icons.delete_forever),
-                    ),
-                  ),
-                ),
-              ],
-              rows: state.dataRows.map(
-                (cost) {
-                  double plannedCost = cost.planned;
-                  double realCost = cost.real;
-
-                  return DataRow(
-                    cells: [
-                      DataCell(
-                        SizedBox(
-                          width: width * 0.3,
-                          height: null,
-                          child: TextFormField(
-                            initialValue: cost.activity,
-                            decoration: InputDecoration(
-                              isCollapsed: true,
-                              hintText: context.loc.trip_costs_activity_hint,
-                            ),
-                            keyboardType: TextInputType.multiline,
-                            maxLines: null,
-                            textInputAction: TextInputAction.next,
-                            onChanged: (text) {
-                              context.read<TripCostBloc>().add(TripCostUpdate(
-                                    fieldName: "name",
-                                    text: text,
-                                    cost: cost,
-                                    trip: context.getArgument<DatabaseTrip>()!,
-                                  ));
-                            },
-                          ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DataTable(
+                headingRowColor: MaterialStateColor.resolveWith(
+                    (states) => Theme.of(context).colorScheme.surfaceVariant),
+                dataRowColor: MaterialStateColor.resolveWith((states) =>
+                    Theme.of(context)
+                        .colorScheme
+                        .surfaceVariant
+                        .withAlpha(100)),
+                columns: [
+                  DataColumn(
+                    label: SizedBox(
+                      width: width * 0.3,
+                      child: Center(
+                        child: Text(
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                          context.loc.trip_costs_activity,
+                          style: const TextStyle(fontStyle: FontStyle.italic),
                         ),
                       ),
-                      DataCell(
-                        SizedBox(
-                          width: width * 0.15,
-                          child: Center(
+                    ),
+                  ),
+                  DataColumn(
+                    label: SizedBox(
+                      width: width * 0.2,
+                      child: Center(
+                        child: Text(
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                          context.loc.trip_costs_planned,
+                          style: const TextStyle(fontStyle: FontStyle.italic),
+                        ),
+                      ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: SizedBox(
+                      width: width * 0.2,
+                      child: Center(
+                        child: Text(
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                          context.loc.trip_costs_real,
+                          style: const TextStyle(fontStyle: FontStyle.italic),
+                        ),
+                      ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: SizedBox(
+                      width: width * 0.1,
+                      child: IconButton(
+                        onPressed: () async {
+                          final shouldDelete = await showConfirmationDialog(
+                            context: context,
+                            title: context.loc.trip_costs_delete,
+                            content: context.loc.trip_costs_delete_content,
+                          );
+                          if (mounted) {
+                            context.read<TripCostBloc>().add(TripCostRemoveAll(
+                                  trip: context.getArgument<DatabaseTrip>()!,
+                                  shouldDelete: shouldDelete,
+                                ));
+                          }
+                        },
+                        icon: const Icon(Icons.delete_forever),
+                      ),
+                    ),
+                  ),
+                ],
+                rows: state.dataRows.map(
+                  (cost) {
+                    double plannedCost = cost.planned;
+                    double realCost = cost.real;
+
+                    return DataRow(
+                      cells: [
+                        DataCell(
+                          SizedBox(
+                            width: width * 0.3,
                             child: TextFormField(
-                              initialValue: cost.planned.isNaN
-                                  ? ''
-                                  : cost.planned.toString(),
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
+                              initialValue: cost.activity,
+                              decoration: InputDecoration(
                                 isCollapsed: true,
-                                hintText: '...',
+                                hintText: context.loc.trip_costs_activity_hint,
+                                border: InputBorder.none,
+                                hintMaxLines: 2,
                               ),
+                              keyboardType: TextInputType.multiline,
+                              maxLines: null,
                               textInputAction: TextInputAction.next,
                               onChanged: (text) {
-                                plannedCost =
-                                    double.tryParse(text) ?? double.nan;
                                 context.read<TripCostBloc>().add(TripCostUpdate(
-                                      fieldName: "planned",
+                                      fieldName: "name",
                                       text: text,
                                       cost: cost,
                                       trip:
@@ -233,62 +214,97 @@ class _CostsListViewState extends State<CostsListView> {
                             ),
                           ),
                         ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: width * 0.15,
-                          child: TextFormField(
-                            initialValue:
-                                cost.real.isNaN ? '' : cost.real.toString(),
-                            onChanged: (text) {
-                              realCost = double.tryParse(text) ?? double.nan;
-                              context.read<TripCostBloc>().add(TripCostUpdate(
-                                    fieldName: "real",
-                                    text: text,
-                                    cost: cost,
-                                    trip: context.getArgument<DatabaseTrip>()!,
-                                  ));
-                            },
-                            decoration: InputDecoration(
-                              isCollapsed: true,
-                              hintText: '...',
-                              filled: true,
-                              fillColor: MaterialStateColor.resolveWith(
-                                (Set<MaterialState> states) {
-                                  if (realCost.isNaN || plannedCost.isNaN) {
-                                    return Colors.transparent;
-                                  } else {
-                                    if (realCost <= plannedCost) {
-                                      return Colors.green.shade200;
-                                    } else {
-                                      return Colors.red.shade200;
-                                    }
-                                  }
+                        DataCell(
+                          SizedBox(
+                            width: width * 0.15,
+                            child: Center(
+                              child: TextFormField(
+                                initialValue: cost.planned.isNaN
+                                    ? ''
+                                    : cost.planned.toString(),
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                  isCollapsed: true,
+                                  hintText: '...',
+                                ),
+                                textInputAction: TextInputAction.next,
+                                onChanged: (text) {
+                                  plannedCost =
+                                      double.tryParse(text) ?? double.nan;
+                                  context
+                                      .read<TripCostBloc>()
+                                      .add(TripCostUpdate(
+                                        fieldName: "planned",
+                                        text: text,
+                                        cost: cost,
+                                        trip: context
+                                            .getArgument<DatabaseTrip>()!,
+                                      ));
                                 },
                               ),
                             ),
-                            keyboardType: TextInputType.number,
                           ),
                         ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: width * 0.1,
-                          child: IconButton(
-                            onPressed: () async {
-                              context.read<TripCostBloc>().add(TripCostRemove(
-                                    cost: cost,
-                                    trip: context.getArgument<DatabaseTrip>()!,
-                                  ));
-                            },
-                            icon: const Icon(Icons.delete),
+                        DataCell(
+                          SizedBox(
+                            width: width * 0.15,
+                            child: TextFormField(
+                              initialValue:
+                                  cost.real.isNaN ? '' : cost.real.toString(),
+                              onChanged: (text) {
+                                realCost = double.tryParse(text) ?? double.nan;
+                                context.read<TripCostBloc>().add(TripCostUpdate(
+                                      fieldName: "real",
+                                      text: text,
+                                      cost: cost,
+                                      trip:
+                                          context.getArgument<DatabaseTrip>()!,
+                                    ));
+                              },
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                isCollapsed: true,
+                                hintText: '...',
+                                filled: true,
+                                fillColor: MaterialStateColor.resolveWith(
+                                  (Set<MaterialState> states) {
+                                    if (realCost.isNaN || plannedCost.isNaN) {
+                                      return Colors.transparent;
+                                    } else {
+                                      if (realCost <= plannedCost) {
+                                        return Colors.green.shade200;
+                                      } else {
+                                        return Colors.red.shade200;
+                                      }
+                                    }
+                                  },
+                                ),
+                              ),
+                              keyboardType: TextInputType.number,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                },
-              ).toList(),
+                        DataCell(
+                          SizedBox(
+                            width: width * 0.1,
+                            child: IconButton(
+                              onPressed: () async {
+                                context.read<TripCostBloc>().add(TripCostRemove(
+                                      cost: cost,
+                                      trip:
+                                          context.getArgument<DatabaseTrip>()!,
+                                    ));
+                              },
+                              icon: const Icon(Icons.delete),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ).toList(),
+              ),
             ),
           );
         }

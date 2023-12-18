@@ -45,10 +45,9 @@
     "trip_edit_date_helper" : "Date of your trip",
     "trip_edit_notes_hint" : "My notes",
     "trip_edit_notes_helper" : "Your notes",
-    "trip_edit_costs_hint" : "Trip costs [.....]",
+    "trip_edit_costs_hint" : "Costs [...]",
     "trip_edit_costs_helper" : "Cost of your trip",
-    "trip_edit_requirements_hint" : "Trip requirements [.....]",
-    "trip_edit_requirements_helper" : "Requirements before your trip",
+    "trip_edit_requirements_hint" : "Requirements [...]",
 
 
     "trip_requirements_title" : "Requirements" ,

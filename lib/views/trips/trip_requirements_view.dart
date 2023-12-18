@@ -112,135 +112,148 @@ class _RequirementsListViewState extends State<RequirementsListView> {
         } else if (state is TripRequirementLoaded) {
           late final width = MediaQuery.of(context).size.width;
           return SingleChildScrollView(
-            child: DataTable(
-              columnSpacing: 20,
-              columns: [
-                DataColumn(
-                  label: SizedBox(
-                    width: width * 0.5,
-                    child: Center(
-                      child: Text(
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
-                        context.loc.trip_requirements_requirement,
-                        style: const TextStyle(fontStyle: FontStyle.italic),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DataTable(
+                headingRowColor: MaterialStateColor.resolveWith(
+                    (states) => Theme.of(context).colorScheme.surfaceVariant),
+                dataRowColor: MaterialStateColor.resolveWith((states) =>
+                    Theme.of(context)
+                        .colorScheme
+                        .surfaceVariant
+                        .withAlpha(100)),
+                columnSpacing: 20,
+                columns: [
+                  DataColumn(
+                    label: SizedBox(
+                      width: width * 0.4,
+                      child: Center(
+                        child: Text(
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                          context.loc.trip_requirements_requirement,
+                          style: const TextStyle(fontStyle: FontStyle.italic),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                DataColumn(
-                  label: SizedBox(
-                    width: width * 0.2,
-                    child: Center(
-                      child: Text(
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
-                        context.loc.trip_requirements_done,
-                        style: const TextStyle(fontStyle: FontStyle.italic),
+                  DataColumn(
+                    label: SizedBox(
+                      width: width * 0.2,
+                      child: Center(
+                        child: Text(
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                          context.loc.trip_requirements_done,
+                          style: const TextStyle(fontStyle: FontStyle.italic),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                DataColumn(
-                  label: SizedBox(
-                    width: width * 0.1,
-                    child: IconButton(
-                      onPressed: () async {
-                        final shouldDelete = await showConfirmationDialog(
-                          context: context,
-                          title: context.loc.trip_requirements_dialog_title,
-                          content: context.loc.trip_requirements_dialog_content,
-                        );
-                        if (mounted) {
-                          context
-                              .read<TripRequirementBloc>()
-                              .add(TripRequirementRemoveAll(
-                                trip: context.getArgument<DatabaseTrip>()!,
-                                shouldDelete: shouldDelete,
-                              ));
-                        }
-                      },
-                      icon: const Icon(Icons.delete_forever),
+                  DataColumn(
+                    label: SizedBox(
+                      width: width * 0.1,
+                      child: IconButton(
+                        onPressed: () async {
+                          final shouldDelete = await showConfirmationDialog(
+                            context: context,
+                            title: context.loc.trip_requirements_dialog_title,
+                            content:
+                                context.loc.trip_requirements_dialog_content,
+                          );
+                          if (mounted) {
+                            context
+                                .read<TripRequirementBloc>()
+                                .add(TripRequirementRemoveAll(
+                                  trip: context.getArgument<DatabaseTrip>()!,
+                                  shouldDelete: shouldDelete,
+                                ));
+                          }
+                        },
+                        icon: const Icon(Icons.delete_forever),
+                      ),
                     ),
                   ),
-                ),
-              ],
-              rows: state.dataRows.map(
-                (requirement) {
-                  final width = MediaQuery.of(context).size.width;
-                  return DataRow(
-                    cells: [
-                      DataCell(
-                        SizedBox(
-                          width: width * 0.5,
-                          child: Center(
-                            child: TextFormField(
-                              initialValue: requirement.name,
-                              textAlign: TextAlign.center,
-                              decoration: InputDecoration(
-                                isCollapsed: true,
-                                hintText: context
-                                    .loc.trip_requirements_requirement_hint,
-                                border: const UnderlineInputBorder(),
+                ],
+                rows: state.dataRows.map(
+                  (requirement) {
+                    final width = MediaQuery.of(context).size.width;
+                    return DataRow(
+                      cells: [
+                        DataCell(
+                          SizedBox(
+                            width: width * 0.4,
+                            child: Center(
+                              child: TextFormField(
+                                initialValue: requirement.name,
+                                textAlign: TextAlign.center,
+                                decoration: InputDecoration(
+                                  isCollapsed: true,
+                                  hintText: context
+                                      .loc.trip_requirements_requirement_hint,
+                                  border: InputBorder.none,
+                                ),
+                                keyboardType: TextInputType.multiline,
+                                maxLines: null,
+                                textInputAction: TextInputAction.next,
+                                onChanged: (text) async {
+                                  context
+                                      .read<TripRequirementBloc>()
+                                      .add(TripRequirementUpdate(
+                                        fieldName: 'name',
+                                        text: text,
+                                        trip: context
+                                            .getArgument<DatabaseTrip>()!,
+                                        requirement: requirement,
+                                      ));
+                                },
                               ),
-                              keyboardType: TextInputType.multiline,
-                              maxLines: null,
-                              textInputAction: TextInputAction.next,
-                              onChanged: (text) async {
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          SizedBox(
+                            width: width * 0.2,
+                            child: Checkbox(
+                              value: requirement.isDone,
+                              onChanged: (bool? value) {
+                                requirement.isDone = value!;
                                 context
                                     .read<TripRequirementBloc>()
                                     .add(TripRequirementUpdate(
-                                      fieldName: 'name',
-                                      text: text,
+                                      trip:
+                                          context.getArgument<DatabaseTrip>()!,
+                                      requirement: requirement,
+                                      fieldName: 'is_done',
+                                      text: value.toString(),
+                                    ));
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          SizedBox(
+                            width: width * 0.1,
+                            child: IconButton(
+                              onPressed: () async {
+                                context
+                                    .read<TripRequirementBloc>()
+                                    .add(TripRequirementRemove(
                                       trip:
                                           context.getArgument<DatabaseTrip>()!,
                                       requirement: requirement,
                                     ));
                               },
+                              icon: const Icon(Icons.delete),
                             ),
                           ),
                         ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: width * 0.2,
-                          child: Checkbox(
-                            value: requirement.isDone,
-                            onChanged: (bool? value) {
-                              requirement.isDone = value!;
-                              context
-                                  .read<TripRequirementBloc>()
-                                  .add(TripRequirementUpdate(
-                                    trip: context.getArgument<DatabaseTrip>()!,
-                                    requirement: requirement,
-                                    fieldName: 'is_done',
-                                    text: value.toString(),
-                                  ));
-                              setState(() {});
-                            },
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: width * 0.1,
-                          child: IconButton(
-                            onPressed: () async {
-                              context
-                                  .read<TripRequirementBloc>()
-                                  .add(TripRequirementRemove(
-                                    trip: context.getArgument<DatabaseTrip>()!,
-                                    requirement: requirement,
-                                  ));
-                            },
-                            icon: const Icon(Icons.delete),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ).toList(),
+                      ],
+                    );
+                  },
+                ).toList(),
+              ),
             ),
           );
         }
