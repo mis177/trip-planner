@@ -1,6 +1,6 @@
 # TripPlanner
 
-Simple app for planning trips.
+Simple android app for planning trips.
 App supports Localization (PL/ENG). 
 Local database is SQLite.
 
