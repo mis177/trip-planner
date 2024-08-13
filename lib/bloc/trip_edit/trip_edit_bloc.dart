@@ -4,8 +4,7 @@ import 'package:tripplanner/bloc/trip_edit/trip_edit_state.dart';
 import 'package:tripplanner/bloc/trip_edit/trip_edit_service.dart';
 
 class TripEditBloc extends Bloc<TripEditEvent, TripEditState> {
-  TripEditBloc(TripEditService utils)
-      : super(const TripEditInitial(exception: null)) {
+  TripEditBloc(TripEditService utils) : super(const TripEditInitial(exception: null)) {
     on<TripLoad>(
       (event, emit) async {
         emit(const TripEditLoadInProgress(exception: null));
@@ -36,7 +35,6 @@ class TripEditBloc extends Bloc<TripEditEvent, TripEditState> {
         trip: event.trip,
         exception: null,
       ));
-      emit(TripEditLoaded(trip: event.trip, exception: null));
     });
 
     on<TripEditSharePress>((event, emit) async {
