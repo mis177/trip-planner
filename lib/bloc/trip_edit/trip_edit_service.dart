@@ -1,4 +1,5 @@
 import 'package:share_plus/share_plus.dart';
+import 'package:tripplanner/bloc/trip_edit/utils/trip_share_formatter.dart';
 import 'package:tripplanner/models/trips.dart';
 import 'package:tripplanner/services/crud/trips_repository.dart';
 
@@ -28,21 +29,7 @@ class TripEditService {
     required DatabaseTrip trip,
     required List<String> message,
   }) async {
-    var sharedTrip = _repository.getTrip(trip.id);
-    String tripCosts = '';
-    for (var cost in sharedTrip.costs) {
-      tripCosts +=
-          '[ ${message[0]}: ${cost.activity}, ${message[1]}: ${cost.planned}, ${message[2]}: ${cost.real} ]\n';
-    }
-
-    String tripRequirements = '';
-    for (var requirement in sharedTrip.requirements) {
-      tripRequirements +=
-          '[ ${message[0]}: ${requirement.name}, ${message[3]}: ${requirement.isDone} ]\n';
-    }
-
-    String sharingText =
-        ' ${message[4]} \n ${message[0]}: ${sharedTrip.name} \n ${message[5]}: ${sharedTrip.destination} \n ${message[6]}: ${sharedTrip.date} \n ${message[7]}: ${sharedTrip.note} \n ${message[8]}: $tripCosts ${message[9]}: $tripRequirements';
+    String sharingText = TripShareFormatter().formatShareMessage(trip, message);
     Share.share(sharingText);
   }
 }
