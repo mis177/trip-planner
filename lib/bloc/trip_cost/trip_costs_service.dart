@@ -15,23 +15,12 @@ class TripCostService {
     Stopwatch stopwatch = Stopwatch()..start();
     await _repository.addCost(trip.id);
     if (stopwatch.elapsed.inMilliseconds < 250) {
-      await Future.delayed(
-          Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
+      await Future.delayed(Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
     }
   }
 
   List<DatabaseCost> loadExistingCost(DatabaseTrip existingTrip) {
-    var trip = _repository.getTrip(existingTrip.id);
-    List<DatabaseCost> newDataRows = [];
-
-    if (trip.costs.isNotEmpty) {
-      for (var previousCost in trip.costs) {
-        newDataRows.add(
-          previousCost,
-        );
-      }
-    }
-    return newDataRows;
+    return _repository.getTrip(existingTrip.id).costs;
   }
 
   Future<void> updateCost({
