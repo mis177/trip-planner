@@ -35,6 +35,7 @@ class TripEditBloc extends Bloc<TripEditEvent, TripEditState> {
         trip: event.trip,
         exception: null,
       ));
+      emit(TripEditLoaded(trip: event.trip, exception: null));
     });
 
     on<TripEditSharePress>((event, emit) async {
