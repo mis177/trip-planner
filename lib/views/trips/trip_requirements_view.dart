@@ -53,62 +53,49 @@ class _RequirementsListViewState extends State<RequirementsListView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(context.loc.trip_requirements_title)),
-      body: BlocConsumer<TripRequirementBloc, TripRequirementState>(
-          listener: (context, state) async {
+      body: BlocConsumer<TripRequirementBloc, TripRequirementState>(listener: (context, state) async {
         if (state is TripRequirementAdded) {
           if (state.exception == null) {
             showSnackBar(context.loc.trip_requirements_added);
           } else {
-            await showErrorDialog(
-                context: context,
-                content: context.loc.trip_requirements_error_add);
+            await showErrorDialog(context: context, content: context.loc.trip_requirements_error_add);
           }
         } else if (state is TripRequirementUpdated) {
           if (state.exception != null) {
-            await showErrorDialog(
-                context: context, content: context.loc.trip_costs_error_update);
-            if (mounted) {
-              context.read<TripRequirementBloc>().add(TripRequirementLoadAll(
-                  trip: context.getArgument<DatabaseTrip>()!));
+            await showErrorDialog(context: context, content: context.loc.trip_costs_error_update);
+            if (context.mounted) {
+              context
+                  .read<TripRequirementBloc>()
+                  .add(TripRequirementLoadAll(trip: context.getArgument<DatabaseTrip>()!));
             }
           }
         } else if (state is TripRequirementDeleted) {
           if (state.exception == null) {
             showSnackBar(context.loc.trip_requirements_deleted);
           } else {
-            await showErrorDialog(
-                context: context,
-                content: context.loc.trip_requirements_error_remove);
+            await showErrorDialog(context: context, content: context.loc.trip_requirements_error_remove);
           }
         } else if (state is TripRequirementDeletedAll) {
           if (state.exception == null) {
             showSnackBar(context.loc.trip_requirements_deleted_all);
           } else {
-            await showErrorDialog(
-                context: context,
-                content: context.loc.trip_requirements_error_remove_all);
+            await showErrorDialog(context: context, content: context.loc.trip_requirements_error_remove_all);
           }
         } else if (state is TripRequirementLoadInProgress) {
-          LoadingScreen().show(
-              context: context, text: context.loc.trip_requirements_loading);
+          LoadingScreen().show(context: context, text: context.loc.trip_requirements_loading);
         } else if (state is TripRequirementAddInProgress) {
-          LoadingScreen().show(
-              context: context, text: context.loc.trip_requirements_adding);
+          LoadingScreen().show(context: context, text: context.loc.trip_requirements_adding);
         } else if (state is TripRequirementDeleteInProgress) {
-          LoadingScreen().show(
-              context: context, text: context.loc.trip_requirements_deleting);
+          LoadingScreen().show(context: context, text: context.loc.trip_requirements_deleting);
         } else if (state is TripRequirementDeleteAllInProgress) {
-          LoadingScreen().show(
-              context: context,
-              text: context.loc.trip_requirements_deleting_all);
+          LoadingScreen().show(context: context, text: context.loc.trip_requirements_deleting_all);
         } else {
           LoadingScreen().hide();
         }
       }, builder: (context, state) {
         if (state is TripRequirementInitial) {
-          context.read<TripRequirementBloc>().add(TripRequirementLoadAll(
-              trip: context.getArgument<DatabaseTrip>()!));
-          return const CircularProgressIndicator();
+          context.read<TripRequirementBloc>().add(TripRequirementLoadAll(trip: context.getArgument<DatabaseTrip>()!));
+          return const Center(child: CircularProgressIndicator());
         } else if (state is TripRequirementLoaded) {
           late final width = MediaQuery.of(context).size.width;
           return SingleChildScrollView(
@@ -151,10 +138,8 @@ class _RequirementsListViewState extends State<RequirementsListView> {
                           title: context.loc.trip_requirements_dialog_title,
                           content: context.loc.trip_requirements_dialog_content,
                         );
-                        if (mounted) {
-                          context
-                              .read<TripRequirementBloc>()
-                              .add(TripRequirementRemoveAll(
+                        if (context.mounted) {
+                          context.read<TripRequirementBloc>().add(TripRequirementRemoveAll(
                                 trip: context.getArgument<DatabaseTrip>()!,
                                 shouldDelete: shouldDelete,
                               ));
@@ -179,21 +164,17 @@ class _RequirementsListViewState extends State<RequirementsListView> {
                               textAlign: TextAlign.center,
                               decoration: InputDecoration(
                                 isCollapsed: true,
-                                hintText: context
-                                    .loc.trip_requirements_requirement_hint,
+                                hintText: context.loc.trip_requirements_requirement_hint,
                                 border: const UnderlineInputBorder(),
                               ),
                               keyboardType: TextInputType.multiline,
                               maxLines: null,
                               textInputAction: TextInputAction.next,
                               onChanged: (text) async {
-                                context
-                                    .read<TripRequirementBloc>()
-                                    .add(TripRequirementUpdate(
+                                context.read<TripRequirementBloc>().add(TripRequirementUpdate(
                                       fieldName: 'name',
                                       text: text,
-                                      trip:
-                                          context.getArgument<DatabaseTrip>()!,
+                                      trip: context.getArgument<DatabaseTrip>()!,
                                       requirement: requirement,
                                     ));
                               },
@@ -208,9 +189,7 @@ class _RequirementsListViewState extends State<RequirementsListView> {
                             value: requirement.isDone,
                             onChanged: (bool? value) {
                               requirement.isDone = value!;
-                              context
-                                  .read<TripRequirementBloc>()
-                                  .add(TripRequirementUpdate(
+                              context.read<TripRequirementBloc>().add(TripRequirementUpdate(
                                     trip: context.getArgument<DatabaseTrip>()!,
                                     requirement: requirement,
                                     fieldName: 'is_done',
@@ -226,9 +205,7 @@ class _RequirementsListViewState extends State<RequirementsListView> {
                           width: width * 0.1,
                           child: IconButton(
                             onPressed: () async {
-                              context
-                                  .read<TripRequirementBloc>()
-                                  .add(TripRequirementRemove(
+                              context.read<TripRequirementBloc>().add(TripRequirementRemove(
                                     trip: context.getArgument<DatabaseTrip>()!,
                                     requirement: requirement,
                                   ));
@@ -244,13 +221,12 @@ class _RequirementsListViewState extends State<RequirementsListView> {
             ),
           );
         }
-        return const CircularProgressIndicator();
+        return Container();
       }),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () async {
-          context.read<TripRequirementBloc>().add(
-              TripRequirementAdd(trip: context.getArgument<DatabaseTrip>()!));
+          context.read<TripRequirementBloc>().add(TripRequirementAdd(trip: context.getArgument<DatabaseTrip>()!));
         },
       ),
     );
