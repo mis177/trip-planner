@@ -49,6 +49,7 @@
     "trip_edit_costs_helper" : "Cost of your trip",
     "trip_edit_requirements_hint" : "Trip requirements [.....]",
     "trip_edit_requirements_helper" : "Requirements before your trip",
+    "trip_edit_name_error" : "Wrong name",
 
 
     "trip_requirements_title" : "Requirements" ,

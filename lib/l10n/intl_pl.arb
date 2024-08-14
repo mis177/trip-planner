@@ -48,6 +48,7 @@
     "trip_edit_costs_helper" : "Koszty Twojej podróży",
     "trip_edit_requirements_hint" : "Wymagania [.....]",
     "trip_edit_requirements_helper" : "Wymagania przed podróżą",
+    "trip_edit_name_error" : "Błędna nazwa",
 
 
     "trip_requirements_title" : "Wymagania" ,
