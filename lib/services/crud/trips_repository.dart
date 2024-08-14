@@ -21,6 +21,10 @@ class TripsRepository {
     );
   }
 
+  void dispose() {
+    _tripsStreamController.close();
+  }
+
   Stream<List<DatabaseTrip>> get allTrips => _tripsStreamController.stream;
 
   Future<Iterable<DatabaseTrip>> getAllTrips() async {
@@ -41,9 +45,7 @@ class TripsRepository {
       (tripRow) => DatabaseTrip.fromRow(
         tripRow,
         costs.where((cost) => tripRow['id'] == cost['trip_id']).toList(),
-        requirements
-            .where((requirement) => tripRow['id'] == requirement['trip_id'])
-            .toList(),
+        requirements.where((requirement) => tripRow['id'] == requirement['trip_id']).toList(),
       ),
     );
   }
@@ -128,7 +130,7 @@ class TripsRepository {
   }
 
   DatabaseTrip getTrip(int id) {
-    return _trips.where((trip) => trip.id == id).first;
+    return _trips.firstWhere((trip) => trip.id == id);
   }
 
   Future<void> cacheTrips() async {
@@ -141,11 +143,7 @@ class TripsRepository {
     await _ensureDbIsOpen();
     final db = getDatabase();
     DatabaseCost newCost = DatabaseCost(
-        id: DateTime.now().microsecondsSinceEpoch,
-        activity: '',
-        planned: double.nan,
-        real: double.nan,
-        tripID: tripId);
+        id: DateTime.now().microsecondsSinceEpoch, activity: '', planned: double.nan, real: double.nan, tripID: tripId);
     await db.insert(
       costsTableName,
       {
@@ -176,10 +174,8 @@ class TripsRepository {
       throw CouldNotUpdateDatabaseException;
     }
 
-    final updatedCosts =
-        _trips.singleWhere((trip) => trip.id == cost.tripID).costs;
-    final updatedCost =
-        updatedCosts.singleWhere((oldCost) => oldCost.id == cost.id);
+    final updatedCosts = _trips.singleWhere((trip) => trip.id == cost.tripID).costs;
+    final updatedCost = updatedCosts.singleWhere((oldCost) => oldCost.id == cost.id);
     switch (field) {
       case 'name':
         updatedCost.activity = value;
@@ -209,11 +205,7 @@ class TripsRepository {
     if (count == 0) {
       throw CouldNotDeleteDatabaseException;
     }
-    _trips
-        .where((element) => element.id == cost.tripID)
-        .first
-        .costs
-        .remove(cost);
+    _trips.where((element) => element.id == cost.tripID).first.costs.remove(cost);
   }
 
   Future<DatabaseRequirement> addRequirement(int tripId) async {
@@ -237,16 +229,12 @@ class TripsRepository {
     );
 
     _tripsStreamController.add(_trips);
-    _trips
-        .singleWhere((element) => element.id == tripId)
-        .requirements
-        .add(newRequirement);
+    _trips.singleWhere((element) => element.id == tripId).requirements.add(newRequirement);
 
     return newRequirement;
   }
 
-  Future<void> updateRequirement(
-      DatabaseRequirement requirement, String field, value) async {
+  Future<void> updateRequirement(DatabaseRequirement requirement, String field, value) async {
     await _ensureDbIsOpen();
     final db = getDatabase();
     int count = await db.update(
@@ -260,11 +248,8 @@ class TripsRepository {
       throw CouldNotUpdateDatabaseException;
     }
 
-    final updatedRequirements = _trips
-        .singleWhere((trip) => trip.id == requirement.tripID)
-        .requirements;
-    final updatedRequirement = updatedRequirements
-        .singleWhere((oldRequirement) => oldRequirement.id == requirement.id);
+    final updatedRequirements = _trips.singleWhere((trip) => trip.id == requirement.tripID).requirements;
+    final updatedRequirement = updatedRequirements.singleWhere((oldRequirement) => oldRequirement.id == requirement.id);
 
     switch (field) {
       case 'name':
@@ -290,11 +275,7 @@ class TripsRepository {
     if (count == 0) {
       throw CouldNotDeleteDatabaseException;
     }
-    _trips
-        .where((element) => element.id == requirement.tripID)
-        .first
-        .requirements
-        .remove(requirement);
+    _trips.where((element) => element.id == requirement.tripID).first.requirements.remove(requirement);
   }
 
   Future<void> openDb() async {
