@@ -104,7 +104,6 @@ class _EditTripViewState extends State<EditTripView> {
             if (state is TripEditInitial) {
               context.read<TripEditBloc>().add(TripLoad(trip: context.getArgument<DatabaseTrip>()!));
             } else if (state is TripEditLoaded) {
-              print("DUDUD");
               dateController.text = state.trip!.date;
 
               return Form(

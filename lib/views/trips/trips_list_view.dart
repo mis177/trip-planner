@@ -63,24 +63,18 @@ class _TripsListViewState extends State<TripsListView> {
             onSelected: (value) async {
               switch (value) {
                 case LanguageMenu.polish:
-                  BlocProvider.of<LanguageBloc>(context)
-                      .add(const ChangeLanguage(localeName: 'pl'));
+                  BlocProvider.of<LanguageBloc>(context).add(const ChangeLanguage(localeName: 'pl'));
 
                   break;
                 case LanguageMenu.english:
-                  BlocProvider.of<LanguageBloc>(context)
-                      .add(const ChangeLanguage(localeName: 'en'));
+                  BlocProvider.of<LanguageBloc>(context).add(const ChangeLanguage(localeName: 'en'));
                   break;
               }
             },
             itemBuilder: (BuildContext context) {
               return [
-                PopupMenuItem<LanguageMenu>(
-                    value: LanguageMenu.polish,
-                    child: Text(context.loc.trip_lang_pl)),
-                PopupMenuItem<LanguageMenu>(
-                    value: LanguageMenu.english,
-                    child: Text(context.loc.trip_lang_en))
+                PopupMenuItem<LanguageMenu>(value: LanguageMenu.polish, child: Text(context.loc.trip_lang_pl)),
+                PopupMenuItem<LanguageMenu>(value: LanguageMenu.english, child: Text(context.loc.trip_lang_en))
               ];
             },
           ),
@@ -99,9 +93,7 @@ class _TripsListViewState extends State<TripsListView> {
                         const TripListLoadAll(),
                       ));
             } else {
-              await showErrorDialog(
-                  context: context,
-                  content: context.loc.trip_list_error_load_trips);
+              await showErrorDialog(context: context, content: context.loc.trip_list_error_load_trips);
             }
           } else if (state is TripListClicked) {
             if (state.exception == null) {
@@ -114,33 +106,26 @@ class _TripsListViewState extends State<TripsListView> {
                         const TripListLoadAll(),
                       ));
             } else {
-              await showErrorDialog(
-                  context: context,
-                  content: context.loc.trip_list_error_load_list);
+              await showErrorDialog(context: context, content: context.loc.trip_list_error_load_list);
             }
           } else if (state is TripListRemoved) {
             if (state.exception == null) {
               showSnackBar(context.loc.trips_list_removed);
             } else {
-              await showErrorDialog(
-                  context: context,
-                  content: context.loc.trip_list_error_remove);
+              await showErrorDialog(context: context, content: context.loc.trip_list_error_remove);
             }
           }
           if (state is TripListAddInProgress) {
             if (context.mounted) {
-              LoadingScreen().show(
-                  context: context, text: context.loc.trips_list_creating);
+              LoadingScreen().show(context: context, text: context.loc.trips_list_creating);
             }
           } else if (state is TripListRemoveInProgress) {
             if (context.mounted) {
-              LoadingScreen().show(
-                  context: context, text: context.loc.trips_list_deleting);
+              LoadingScreen().show(context: context, text: context.loc.trips_list_deleting);
             }
           } else if (state is TripListRemoveInProgress) {
             if (context.mounted) {
-              LoadingScreen()
-                  .show(context: context, text: context.loc.trips_list_loading);
+              LoadingScreen().show(context: context, text: context.loc.trips_list_loading);
             }
           } else {
             LoadingScreen().hide();
@@ -174,7 +159,7 @@ class _TripsListViewState extends State<TripsListView> {
                       title: context.loc.trips_list_dialog_title,
                       content: context.loc.trips_list_dialog_content,
                     );
-                    if (mounted) {
+                    if (context.mounted) {
                       context.read<TripListBloc>().add(
                             TripListRemove(
                               trip: trip,

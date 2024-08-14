@@ -18,18 +18,11 @@ class DatabaseTrip {
   });
 
   factory DatabaseTrip.empty() {
-    return DatabaseTrip(
-        id: -1,
-        name: '',
-        destination: '',
-        date: '',
-        note: '',
-        costs: [],
-        requirements: []);
+    return DatabaseTrip(id: -1, name: '', destination: '', date: '', note: '', costs: [], requirements: []);
   }
 
-  DatabaseTrip.fromRow(Map<String, Object?> map,
-      List<Map<String, Object?>> costs, List<Map<String, Object?>> requirements)
+  DatabaseTrip.fromRow(
+      Map<String, Object?> map, List<Map<String, Object?>> costs, List<Map<String, Object?>> requirements)
       : id = map[idColumn] as int,
         name = map[nameColumn] as String,
         destination = map[destinationColumn] as String,
@@ -39,10 +32,8 @@ class DatabaseTrip {
             .map((e) => DatabaseCost(
                   id: e[idColumn] as int,
                   activity: e[nameColumn] as String,
-                  planned: (double.tryParse(e[plannedColumn].toString()) ??
-                      double.nan),
-                  real:
-                      (double.tryParse(e[realColumn].toString()) ?? double.nan),
+                  planned: (double.tryParse(e[plannedColumn].toString()) ?? double.nan),
+                  real: (double.tryParse(e[realColumn].toString()) ?? double.nan),
                   tripID: e[tripIdColumn] as int,
                 ))
             .toList(),

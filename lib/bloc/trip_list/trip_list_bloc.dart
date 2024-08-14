@@ -6,8 +6,7 @@ import 'package:tripplanner/const/routes.dart';
 import 'package:tripplanner/models/trips.dart';
 
 class TripListBloc extends Bloc<TripListEvent, TripListState> {
-  TripListBloc(TripListService utils)
-      : super(const TripListInitial(exception: null)) {
+  TripListBloc(TripListService utils) : super(const TripListInitial(exception: null)) {
     on<TripListLoadAll>((event, emit) async {
       Stopwatch stopwatch = Stopwatch()..start();
       emit(const TripListLoadInProgress(exception: null));
@@ -21,8 +20,7 @@ class TripListBloc extends Bloc<TripListEvent, TripListState> {
 
       // for prettier display
       if (stopwatch.elapsed.inMilliseconds < 250) {
-        await Future.delayed(
-            Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
+        await Future.delayed(Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
       }
       emit(TripListLoaded(allTrips: tripsList, exception: exception));
     });
@@ -40,8 +38,7 @@ class TripListBloc extends Bloc<TripListEvent, TripListState> {
 
       // for prettier display
       if (stopwatch.elapsed.inMilliseconds < 250) {
-        await Future.delayed(
-            Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
+        await Future.delayed(Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
       }
 
       emit(TripListAdded(
@@ -71,8 +68,7 @@ class TripListBloc extends Bloc<TripListEvent, TripListState> {
 
         // for prettier display
         if (stopwatch.elapsed.inMilliseconds < 250) {
-          await Future.delayed(
-              Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
+          await Future.delayed(Duration(milliseconds: 250 - stopwatch.elapsed.inMilliseconds));
         }
         emit(TripListRemoved(exception: exception));
         emit(TripListLoaded(allTrips: tripsList, exception: exceptionAllTrips));

@@ -4,7 +4,7 @@ final appTheme = ThemeData(
   appBarTheme: AppBarTheme(
     scrolledUnderElevation: 10.0,
     shadowColor: Colors.indigo[300],
-    backgroundColor: Colors.indigo[600],
+    backgroundColor: Colors.white,
   ),
   colorScheme: ColorScheme.fromSeed(
     seedColor: Colors.white,
