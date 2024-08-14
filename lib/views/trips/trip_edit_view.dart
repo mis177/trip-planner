@@ -40,26 +40,11 @@ class EditTripView extends StatefulWidget {
 
 class _EditTripViewState extends State<EditTripView> {
   late final TextEditingController dateController;
-  void showSnackBar(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.green,
-        content: Text(text),
-        duration: const Duration(milliseconds: 350),
-      ),
-    );
-  }
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     dateController = TextEditingController();
-    dateController.addListener(() {
-      context.read<TripEditBloc>().add(TripEditUpdate(
-            fieldName: 'date',
-            text: dateController.text,
-            trip: context.getArgument<DatabaseTrip>()!,
-          ));
-    });
     super.initState();
   }
 
@@ -71,6 +56,7 @@ class _EditTripViewState extends State<EditTripView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(context.loc.trip_edit_title),
@@ -107,129 +93,226 @@ class _EditTripViewState extends State<EditTripView> {
               );
             } else if (state is TripEditUpdated) {
               if (state.exception != null) {
-                await showErrorDialog(
-                    context: context,
-                    content: context.loc.trip_costs_error_update);
-                if (mounted) {
-                  context.read<TripEditBloc>().add(
-                      TripLoad(trip: context.getArgument<DatabaseTrip>()!));
+                await showErrorDialog(context: context, content: context.loc.trip_costs_error_update);
+                if (context.mounted) {
+                  context.read<TripEditBloc>().add(TripLoad(trip: context.getArgument<DatabaseTrip>()!));
                 }
               }
             }
           },
           builder: (context, state) {
             if (state is TripEditInitial) {
-              context
-                  .read<TripEditBloc>()
-                  .add(TripLoad(trip: context.getArgument<DatabaseTrip>()!));
+              context.read<TripEditBloc>().add(TripLoad(trip: context.getArgument<DatabaseTrip>()!));
             } else if (state is TripEditLoaded) {
+              print("DUDUD");
               dateController.text = state.trip!.date;
-              return Column(
-                children: [
-                  TextFormField(
-                    initialValue: state.trip?.name,
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                    decoration: InputDecoration(
-                      hintText: context.loc.trip_edit_name_hint,
-                      helperText: context.loc.trip_edit_name_helper,
-                    ),
-                    onChanged: (text) {
-                      context.read<TripEditBloc>().add(TripEditUpdate(
-                            fieldName: 'name',
-                            text: text,
-                            trip: context.getArgument<DatabaseTrip>()!,
-                          ));
-                    },
-                  ),
-                  TextFormField(
-                    initialValue: state.trip?.destination,
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                    decoration: InputDecoration(
-                      hintText: context.loc.trip_edit_destination_hint,
-                      helperText: context.loc.trip_edit_destination_helper,
-                    ),
-                    onChanged: (text) {
-                      context.read<TripEditBloc>().add(TripEditUpdate(
-                            fieldName: 'destination',
-                            text: text,
-                            trip: context.getArgument<DatabaseTrip>()!,
-                          ));
-                    },
-                  ),
-                  TextField(
-                    controller: dateController,
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                    decoration: InputDecoration(
-                      hintText: context.loc.trip_edit_date_hint,
-                      helperText: context.loc.trip_edit_date_helper,
-                    ),
-                    readOnly: true,
-                    onTap: () async {
-                      DateTimeRange? tripDate = await showDateRangePicker(
-                          context: context,
-                          firstDate: DateTime.now(),
-                          lastDate:
-                              DateTime.now().add(const Duration(days: 730)));
 
-                      if (tripDate != null) {
-                        dateController.text =
-                            tripDate.toString().replaceAll('00:00:00.000', '');
-                      }
-                    },
-                  ),
-                  TextFormField(
-                    initialValue: state.trip?.note,
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                    decoration: InputDecoration(
-                      hintText: context.loc.trip_edit_notes_hint,
-                      helperText: context.loc.trip_edit_notes_helper,
-                    ),
-                    onChanged: (text) {
-                      context.read<TripEditBloc>().add(TripEditUpdate(
-                            fieldName: 'note',
-                            text: text,
-                            trip: context.getArgument<DatabaseTrip>()!,
-                          ));
-                    },
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: context.loc.trip_edit_costs_hint,
-                      helperText: context.loc.trip_edit_costs_helper,
-                    ),
-                    readOnly: true,
-                    onTap: () {
-                      context.read<TripEditBloc>().add(TripEditTablePress(
-                            route: tripCostRoute,
-                            trip: context.getArgument<DatabaseTrip>()!,
-                          ));
-                    },
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: context.loc.trip_edit_requirements_hint,
-                      helperText: context.loc.trip_edit_requirements_helper,
-                    ),
-                    readOnly: true,
-                    onTap: () {
-                      context.read<TripEditBloc>().add(
-                            TripEditTablePress(
-                              route: tripRequirementsRoute,
-                              trip: context.getArgument<DatabaseTrip>()!,
+              return Form(
+                key: _formKey,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Card(
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: TextFormField(
+                            initialValue: state.trip?.name,
+                            keyboardType: TextInputType.text,
+                            decoration: InputDecoration(
+                              labelText: context.loc.trip_edit_name_hint,
+                              helperText: context.loc.trip_edit_name_helper,
+                              filled: true,
+                              fillColor: Colors.grey.shade200,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
                             ),
-                          );
-                    },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return context.loc.trip_edit_name_error;
+                              }
+                              return null;
+                            },
+                            onChanged: (text) {
+                              context.read<TripEditBloc>().add(TripEditUpdate(
+                                    fieldName: 'name',
+                                    text: text,
+                                    trip: context.getArgument<DatabaseTrip>()!,
+                                  ));
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Card(
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: TextFormField(
+                            initialValue: state.trip?.destination,
+                            keyboardType: TextInputType.multiline,
+                            maxLines: null,
+                            decoration: InputDecoration(
+                              labelText: context.loc.trip_edit_destination_hint,
+                              helperText: context.loc.trip_edit_destination_helper,
+                              filled: true,
+                              fillColor: Colors.grey.shade200,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            onChanged: (text) {
+                              context.read<TripEditBloc>().add(TripEditUpdate(
+                                    fieldName: 'destination',
+                                    text: text,
+                                    trip: context.getArgument<DatabaseTrip>()!,
+                                  ));
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Card(
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: TextFormField(
+                            controller: dateController,
+                            keyboardType: TextInputType.multiline,
+                            maxLines: null,
+                            readOnly: true,
+                            decoration: InputDecoration(
+                              labelText: context.loc.trip_edit_date_hint,
+                              helperText: context.loc.trip_edit_date_helper,
+                              filled: true,
+                              fillColor: Colors.grey.shade200,
+                              suffixIcon: const Icon(Icons.calendar_today),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            onTap: () async {
+                              DateTimeRange? tripDate = await showDateRangePicker(
+                                  context: context,
+                                  firstDate: DateTime.now(),
+                                  lastDate: DateTime.now().add(const Duration(days: 730)));
+
+                              if (tripDate != null) {
+                                dateController.text = tripDate.toString().replaceAll('00:00:00.000', '');
+                                if (context.mounted) {
+                                  setState(() {
+                                    state.trip!.date = dateController.text;
+                                    context.read<TripEditBloc>().add(TripEditUpdate(
+                                          fieldName: 'date',
+                                          text: dateController.text,
+                                          trip: context.getArgument<DatabaseTrip>()!,
+                                        ));
+                                  });
+                                }
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Card(
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: TextFormField(
+                            initialValue: state.trip?.note,
+                            keyboardType: TextInputType.multiline,
+                            maxLines: null,
+                            decoration: InputDecoration(
+                              labelText: context.loc.trip_edit_notes_hint,
+                              helperText: context.loc.trip_edit_notes_helper,
+                              filled: true,
+                              fillColor: Colors.grey.shade200,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            onChanged: (text) {
+                              context.read<TripEditBloc>().add(TripEditUpdate(
+                                    fieldName: 'note',
+                                    text: text,
+                                    trip: context.getArgument<DatabaseTrip>()!,
+                                  ));
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Card(
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              labelText: context.loc.trip_edit_costs_hint,
+                              helperText: context.loc.trip_edit_costs_helper,
+                              filled: true,
+                              fillColor: Colors.grey.shade200,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            readOnly: true,
+                            onTap: () {
+                              context.read<TripEditBloc>().add(TripEditTablePress(
+                                    route: tripCostRoute,
+                                    trip: context.getArgument<DatabaseTrip>()!,
+                                  ));
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Card(
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              labelText: context.loc.trip_edit_requirements_hint,
+                              helperText: context.loc.trip_edit_requirements_helper,
+                              filled: true,
+                              fillColor: Colors.grey.shade200,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            readOnly: true,
+                            onTap: () {
+                              context.read<TripEditBloc>().add(
+                                    TripEditTablePress(
+                                      route: tripRequirementsRoute,
+                                      trip: context.getArgument<DatabaseTrip>()!,
+                                    ),
+                                  );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               );
             }
             return const CircularProgressIndicator();
           },
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (_formKey.currentState!.validate()) {
+            Navigator.pop(context);
+          }
+        },
+        backgroundColor: theme.colorScheme.secondary,
+        child: const Icon(Icons.check),
       ),
     );
   }
