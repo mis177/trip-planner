@@ -49,128 +49,99 @@ class _CostsListViewState extends State<CostsListView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(context.loc.trip_costs_title),
       ),
-      body: BlocConsumer<TripCostBloc, TripCostState>(
-          listener: (context, state) async {
+      body: BlocConsumer<TripCostBloc, TripCostState>(listener: (context, state) async {
         if (state is TripCostAdded) {
           if (state.exception == null) {
             showSnackBar(context.loc.trip_costs_added);
           } else {
-            await showErrorDialog(
-                context: context, content: context.loc.trip_costs_error_add);
+            await showErrorDialog(context: context, content: context.loc.trip_costs_error_add);
           }
         } else if (state is TripCostDeleted) {
           if (state.exception == null) {
             showSnackBar(context.loc.trip_costs_deleted);
           } else {
-            await showErrorDialog(
-                context: context, content: context.loc.trip_costs_error_remove);
+            await showErrorDialog(context: context, content: context.loc.trip_costs_error_remove);
           }
         } else if (state is TripCostDeleted) {
           if (state.exception == null) {
             showSnackBar(context.loc.trip_costs_deleted);
           } else {
-            await showErrorDialog(
-                context: context, content: context.loc.trip_costs_error_remove);
+            await showErrorDialog(context: context, content: context.loc.trip_costs_error_remove);
           }
         } else if (state is TripCostUpdated) {
           if (state.exception != null) {
-            await showErrorDialog(
-                context: context, content: context.loc.trip_costs_error_update);
-            if (mounted) {
-              context.read<TripCostBloc>().add(
-                  TripCostLoadAll(trip: context.getArgument<DatabaseTrip>()!));
+            await showErrorDialog(context: context, content: context.loc.trip_costs_error_update);
+            if (context.mounted) {
+              context.read<TripCostBloc>().add(TripCostLoadAll(trip: context.getArgument<DatabaseTrip>()!));
             }
           }
         } else if (state is TripCostLoadInProgress) {
-          LoadingScreen()
-              .show(context: context, text: context.loc.trip_costs_loading);
+          LoadingScreen().show(context: context, text: context.loc.trip_costs_loading);
         } else if (state is TripCostAddInProgress) {
-          LoadingScreen()
-              .show(context: context, text: context.loc.trip_costs_adding);
+          LoadingScreen().show(context: context, text: context.loc.trip_costs_adding);
         } else if (state is TripCostDeleteInProgress) {
-          LoadingScreen()
-              .show(context: context, text: context.loc.trip_costs_deleting);
+          LoadingScreen().show(context: context, text: context.loc.trip_costs_deleting);
         } else if (state is TripCostDeleteAllInProgress) {
-          LoadingScreen().show(
-              context: context, text: context.loc.trip_costs_deleting_all);
+          LoadingScreen().show(context: context, text: context.loc.trip_costs_deleting_all);
         } else {
           LoadingScreen().hide();
         }
       }, builder: (context, state) {
         if (state is TripCostInitial) {
-          context
-              .read<TripCostBloc>()
-              .add(TripCostLoadAll(trip: context.getArgument<DatabaseTrip>()!));
+          context.read<TripCostBloc>().add(TripCostLoadAll(trip: context.getArgument<DatabaseTrip>()!));
         } else if (state is TripCostLoaded) {
-          late final width = MediaQuery.of(context).size.width;
+          final width = MediaQuery.of(context).size.width;
 
           return SingleChildScrollView(
             child: DataTable(
               columnSpacing: 20,
               columns: [
                 DataColumn(
-                  label: SizedBox(
-                    width: width * 0.3,
-                    child: Center(
-                      child: Text(
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
-                        context.loc.trip_costs_activity,
-                        style: const TextStyle(fontStyle: FontStyle.italic),
-                      ),
+                  label: Center(
+                    child: Text(
+                      context.loc.trip_costs_activity,
+                      style: const TextStyle(fontStyle: FontStyle.italic),
                     ),
                   ),
                 ),
                 DataColumn(
-                  label: SizedBox(
-                    width: width * 0.15,
-                    child: Center(
-                      child: Text(
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
-                        context.loc.trip_costs_planned,
-                        style: const TextStyle(fontStyle: FontStyle.italic),
-                      ),
+                  label: Center(
+                    child: Text(
+                      context.loc.trip_costs_planned,
+                      style: const TextStyle(fontStyle: FontStyle.italic),
                     ),
                   ),
                   numeric: true,
                 ),
                 DataColumn(
-                  label: SizedBox(
-                    width: width * 0.15,
-                    child: Center(
-                      child: Text(
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
-                        context.loc.trip_costs_real,
-                        style: const TextStyle(fontStyle: FontStyle.italic),
-                      ),
+                  label: Center(
+                    child: Text(
+                      context.loc.trip_costs_real,
+                      style: const TextStyle(fontStyle: FontStyle.italic),
                     ),
                   ),
                 ),
                 DataColumn(
-                  label: SizedBox(
-                    width: width * 0.1,
-                    child: IconButton(
-                      onPressed: () async {
-                        final shouldDelete = await showConfirmationDialog(
-                          context: context,
-                          title: context.loc.trip_costs_delete,
-                          content: context.loc.trip_costs_delete_content,
-                        );
-                        if (mounted) {
-                          context.read<TripCostBloc>().add(TripCostRemoveAll(
-                                trip: context.getArgument<DatabaseTrip>()!,
-                                shouldDelete: shouldDelete,
-                              ));
-                        }
-                      },
-                      icon: const Icon(Icons.delete_forever),
-                    ),
+                  label: IconButton(
+                    onPressed: () async {
+                      final shouldDelete = await showConfirmationDialog(
+                        context: context,
+                        title: context.loc.trip_costs_delete,
+                        content: context.loc.trip_costs_delete_content,
+                      );
+                      if (context.mounted) {
+                        context.read<TripCostBloc>().add(TripCostRemoveAll(
+                              trip: context.getArgument<DatabaseTrip>()!,
+                              shouldDelete: shouldDelete,
+                            ));
+                      }
+                    },
+                    icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
                   ),
                 ),
               ],
@@ -184,7 +155,6 @@ class _CostsListViewState extends State<CostsListView> {
                       DataCell(
                         SizedBox(
                           width: width * 0.3,
-                          height: null,
                           child: TextFormField(
                             initialValue: cost.activity,
                             decoration: InputDecoration(
@@ -210,9 +180,7 @@ class _CostsListViewState extends State<CostsListView> {
                           width: width * 0.15,
                           child: Center(
                             child: TextFormField(
-                              initialValue: cost.planned.isNaN
-                                  ? ''
-                                  : cost.planned.toString(),
+                              initialValue: cost.planned.isNaN ? '' : cost.planned.toString(),
                               keyboardType: TextInputType.number,
                               decoration: const InputDecoration(
                                 isCollapsed: true,
@@ -220,14 +188,12 @@ class _CostsListViewState extends State<CostsListView> {
                               ),
                               textInputAction: TextInputAction.next,
                               onChanged: (text) {
-                                plannedCost =
-                                    double.tryParse(text) ?? double.nan;
+                                plannedCost = double.tryParse(text) ?? double.nan;
                                 context.read<TripCostBloc>().add(TripCostUpdate(
                                       fieldName: "planned",
                                       text: text,
                                       cost: cost,
-                                      trip:
-                                          context.getArgument<DatabaseTrip>()!,
+                                      trip: context.getArgument<DatabaseTrip>()!,
                                     ));
                               },
                             ),
@@ -238,8 +204,7 @@ class _CostsListViewState extends State<CostsListView> {
                         SizedBox(
                           width: width * 0.15,
                           child: TextFormField(
-                            initialValue:
-                                cost.real.isNaN ? '' : cost.real.toString(),
+                            initialValue: cost.real.isNaN ? '' : cost.real.toString(),
                             onChanged: (text) {
                               realCost = double.tryParse(text) ?? double.nan;
                               context.read<TripCostBloc>().add(TripCostUpdate(
@@ -253,16 +218,12 @@ class _CostsListViewState extends State<CostsListView> {
                               isCollapsed: true,
                               hintText: '...',
                               filled: true,
-                              fillColor: MaterialStateColor.resolveWith(
-                                (Set<MaterialState> states) {
+                              fillColor: WidgetStateColor.resolveWith(
+                                (Set<WidgetState> states) {
                                   if (realCost.isNaN || plannedCost.isNaN) {
                                     return Colors.transparent;
                                   } else {
-                                    if (realCost <= plannedCost) {
-                                      return Colors.green.shade200;
-                                    } else {
-                                      return Colors.red.shade200;
-                                    }
+                                    return realCost <= plannedCost ? Colors.green.shade200 : Colors.red.shade200;
                                   }
                                 },
                               ),
@@ -295,11 +256,10 @@ class _CostsListViewState extends State<CostsListView> {
         return Container();
       }),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: theme.colorScheme.secondary,
         child: const Icon(Icons.add),
         onPressed: () async {
-          context
-              .read<TripCostBloc>()
-              .add(TripCostAdd(trip: context.getArgument<DatabaseTrip>()!));
+          context.read<TripCostBloc>().add(TripCostAdd(trip: context.getArgument<DatabaseTrip>()!));
         },
       ),
     );
